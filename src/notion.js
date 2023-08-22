@@ -7,6 +7,7 @@ const notion = new Client({
 
 const database_id = process.env.NOTION_DB_ID;
 
+//create a notion page
 module.exports = async (fields) => {
   try {
     const response = await notion.pages.create({

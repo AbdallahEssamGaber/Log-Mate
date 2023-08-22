@@ -1,9 +1,10 @@
-// Require the necessary discord.js classes
-const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
+const { Client, Collection, GatewayIntentBits } = require("discord.js");
 
 class Bot {
   constructor() {
+    //to make sure if it's already mounted on initializing
     this.initialized = false;
+
     this.client = {};
   }
 
@@ -27,6 +28,7 @@ const DiscordBot = global.DiscordBot || new Bot();
 if (!global.DiscordBot) {
   DiscordBot.initialize();
   global.DiscordBot = DiscordBot;
+  console.log(global.DiscordBot);
 }
 
 module.exports = DiscordBot;

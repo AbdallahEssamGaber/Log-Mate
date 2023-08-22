@@ -1,5 +1,4 @@
 require("dotenv").config();
-// require("isomorphic-fetch");
 const InitializeBot = require("./src/discord/configuration/initialize");
 
 const PORT = process.env.PORT || 3000;

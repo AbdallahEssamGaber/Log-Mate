@@ -4,11 +4,12 @@ const mountListeners = require("./mount-listener");
 
 module.exports = async () => {
   while (!Bot.initialized) {
-    // Retry until bot mounts. Can sometimes take several seconds in development
+    //Retry until bot mounts. Can sometimes take several seconds in development
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   await deployCommands(Bot.client);
 
+  //Start the listeners
   mountListeners();
 };

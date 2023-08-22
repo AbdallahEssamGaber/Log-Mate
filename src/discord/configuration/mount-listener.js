@@ -11,10 +11,11 @@ module.exports = () => {
   for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
     const { ...events } = require(filePath);
-    console.log(events);
+
     for (const prop in events) {
       const event = events[prop];
       if (event.once) {
+        //When the client is ready, run this code (only once)
         client.once(event.name, (...args) => event.execute(...args));
       } else {
         client.on(event.name, (...args) => event.execute(...args));
