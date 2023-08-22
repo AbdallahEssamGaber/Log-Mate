@@ -33,14 +33,10 @@ Check-In for workers over Discord using NodeJS Express NotionAPI and DiscordAPI
 
 ### Frameworks
 
----
-
 For development, you will need <ins>**[Node.js](https://nodejs.org/)**</ins> and the <ins>**[npm](https://npmjs.org/)**</ins> node global package installed and ready in your environement.
 <br>
 
 ### Create a Notion Database
-
----
 
 1. Create a new [Integration](https://www.notion.so/my-integrations). To link it with your database. Don't forget to copy the integration secret to use later. _[docs if you're stuck!](https://developers.notion.com/docs/create-a-notion-integration#getting-started)_
 2. Create a new notion database with the same properties below and link the integration with the database. _[docs if you're stuck!](https://developers.notion.com/docs/create-a-notion-integration#give-your-integration-page-permissions)_
@@ -49,16 +45,12 @@ For development, you will need <ins>**[Node.js](https://nodejs.org/)**</ins> and
 
 ### Create a Discord Bot
 
----
-
 Check that [simple guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot) to do so
 
 <br>
 <br>
 
 ## Install
-
----
 
     $ git clone https://github.com/AbdallahEssamGaber/daily-check-in
     $ cd daily-check-in
@@ -68,8 +60,6 @@ Check that [simple guide](https://discordjs.guide/preparations/setting-up-a-bot-
 <br>
 
 ## Configuration
-
----
 
 in the root directory create a `.env` file.
 
@@ -88,16 +78,12 @@ Open `.env` then edit it with your settings. You will need:
 
 ## Running the project
 
----
-
     npm run start
 
 <br>
 <br>
 
 ## Folder Structure
-
----
 
 `index.js` &#8594; The base file.
 
