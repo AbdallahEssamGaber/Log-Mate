@@ -28,7 +28,6 @@ const DiscordBot = global.DiscordBot || new Bot();
 if (!global.DiscordBot) {
   DiscordBot.initialize();
   global.DiscordBot = DiscordBot;
-  console.log(global.DiscordBot);
 }
 
 module.exports = DiscordBot;
