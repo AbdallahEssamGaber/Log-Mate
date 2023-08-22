@@ -6,8 +6,7 @@ const {
   TextInputStyle,
 } = require("discord.js");
 
-const createNotoinPage = require("./../notion");
-const notion = require("./../notion");
+const createNotoinPage = require("./../../notion");
 
 const modelInteractionCreate = {
   name: Events.InteractionCreate,
