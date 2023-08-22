@@ -28,10 +28,6 @@ Check-In for workers over Discord using NodeJS Express NotionAPI and DiscordAPI
   <br>
   <br>
   <br>
-  <br>
-  <br>
-
----
 
 ## Requirements
 
@@ -49,6 +45,7 @@ For development, you will need <ins>**[Node.js](https://nodejs.org/)**</ins> and
 1. Create a new [Integration](https://www.notion.so/my-integrations). To link it with your database. Don't forget to copy the integration secret to use later. _[docs if you're stuck!](https://developers.notion.com/docs/create-a-notion-integration#getting-started)_
 2. Create a new notion database with the same properties below and link the integration with the database. _[docs if you're stuck!](https://developers.notion.com/docs/create-a-notion-integration#give-your-integration-page-permissions)_
    <img src="https://i.imgur.com/Fzn9tFo.png" title="source: imgur.com" />
+   <br>
 
 ### Create a Discord Bot
 
@@ -67,6 +64,9 @@ Check that [simple guide](https://discordjs.guide/preparations/setting-up-a-bot-
     $ cd daily-check-in
     $ npm install
 
+<br>
+<br>
+
 ## Configuration
 
 ---
@@ -84,6 +84,7 @@ Open `.env` then edit it with your settings. You will need:
     NOTION_DB_ID=<Notion database token :string>
 
 <br>
+<br>
 
 ## Running the project
 
@@ -91,6 +92,7 @@ Open `.env` then edit it with your settings. You will need:
 
     npm run start
 
+<br>
 <br>
 
 ## Folder Structure
