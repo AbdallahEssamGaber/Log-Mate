@@ -6,12 +6,12 @@ const {
   TextInputStyle,
 } = require("discord.js");
 
-module.exports = {
+const modelInteractionCreate = {
   name: Events.InteractionCreate,
   async execute(interaction) {
     if (!interaction.isChatInputCommand()) return;
 
-    if (interaction.commandName === "ping") {
+    if (interaction.commandName === "check-in") {
       // Create the modal
       const modal = new ModalBuilder()
         .setCustomId("dailyCheckIn")
@@ -58,3 +58,30 @@ module.exports = {
     }
   },
 };
+
+const submitModelInteractionCreate = {
+  name: Events.InteractionCreate,
+  async execute(interaction) {
+    if (!interaction.isModalSubmit()) return;
+
+    if (interaction.customId === "dailyCheckIn") {
+      const field1 = interaction.fields.getTextInputValue("perviousWorkday");
+      const field2 = interaction.fields.getTextInputValue("todayWork");
+      const field3 = interaction.fields.getTextInputValue("blockers");
+      await interaction.reply({
+        content: "Your submission was received successfully!",
+        ephemeral: true,
+      });
+      const user = interaction.user;
+      console.log({
+        field1,
+        field2,
+        field3,
+        username: user.username,
+        name: user.globalName,
+      });
+    }
+  },
+};
+
+module.exports = { modelInteractionCreate, submitModelInteractionCreate };

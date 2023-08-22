@@ -1,6 +1,6 @@
-const { Events } = require("discord.js");
+const { Events, ModalSubmitFields } = require("discord.js");
 
-module.exports = {
+module.exports.ready = {
   name: Events.ClientReady,
   once: true,
 
