@@ -18,16 +18,6 @@ const modelInteractionCreate = {
         .setCustomId("dailyCheckIn")
         .setTitle("Daily-Check-In");
 
-      const perviousWorkday = new TextInputBuilder()
-        .setCustomId("perviousWorkday")
-
-        //The label is the prompt the user sees for this input
-        .setLabel("Completed in your pervious workday")
-        .setPlaceholder("What did you complete in your pervious workday?")
-
-        //Short means only a single line of text
-        .setStyle(TextInputStyle.Short);
-
       const todayWork = new TextInputBuilder()
         .setCustomId("todayWork")
         .setLabel("Planning to work on today")
@@ -46,13 +36,10 @@ const modelInteractionCreate = {
 
       //An action row only holds one text input,
       //so you need one action row per text input.
-      const firstActionRow = new ActionRowBuilder().addComponents(
-        perviousWorkday
-      );
       const secondActionRow = new ActionRowBuilder().addComponents(todayWork);
       const thirdActionRow = new ActionRowBuilder().addComponents(blockers);
       //Add inputs to the modal
-      modal.addComponents(firstActionRow, secondActionRow, thirdActionRow);
+      modal.addComponents(secondActionRow, thirdActionRow);
 
       //Show the modal to the user
       await interaction.showModal(modal);
@@ -66,8 +53,6 @@ const submitModelInteractionCreate = {
     if (!interaction.isModalSubmit()) return;
 
     if (interaction.customId === "dailyCheckIn") {
-      const perviousWorkday =
-        interaction.fields.getTextInputValue("perviousWorkday");
       const todayWork = interaction.fields.getTextInputValue("todayWork");
       const blockers = interaction.fields.getTextInputValue("blockers");
       await interaction.reply({
@@ -76,13 +61,12 @@ const submitModelInteractionCreate = {
       });
       const user = interaction.user;
       const info = {
-        perviousWorkday,
         todayWork,
         blockers,
         username: user.username,
         name: user.globalName,
       };
-      await createNotionPage(info);
+      // await createNotionPage(info);
       console.log(info);
     }
   },
