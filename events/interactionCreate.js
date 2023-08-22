@@ -6,6 +6,9 @@ const {
   TextInputStyle,
 } = require("discord.js");
 
+const createNotoinPage = require("./../notion");
+const notion = require("./../notion");
+
 const modelInteractionCreate = {
   name: Events.InteractionCreate,
   async execute(interaction) {
@@ -65,21 +68,24 @@ const submitModelInteractionCreate = {
     if (!interaction.isModalSubmit()) return;
 
     if (interaction.customId === "dailyCheckIn") {
-      const field1 = interaction.fields.getTextInputValue("perviousWorkday");
-      const field2 = interaction.fields.getTextInputValue("todayWork");
-      const field3 = interaction.fields.getTextInputValue("blockers");
+      const perviousWorkday =
+        interaction.fields.getTextInputValue("perviousWorkday");
+      const todayWork = interaction.fields.getTextInputValue("todayWork");
+      const blockers = interaction.fields.getTextInputValue("blockers");
       await interaction.reply({
         content: "Your submission was received successfully!",
         ephemeral: true,
       });
       const user = interaction.user;
-      console.log({
-        field1,
-        field2,
-        field3,
+      const info = {
+        perviousWorkday,
+        todayWork,
+        blockers,
         username: user.username,
         name: user.globalName,
-      });
+      };
+      await createNotoinPage(info);
+      console.log(info);
     }
   },
 };
