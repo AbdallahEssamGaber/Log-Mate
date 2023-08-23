@@ -7,6 +7,7 @@ const {
 } = require("discord.js");
 
 const { createCheckIn, createCheckOut } = require("./../../notion");
+const parseTime = require("./../../general_modules/parseTime");
 
 const modelInteractionCreate = {
   name: Events.InteractionCreate,
@@ -58,18 +59,24 @@ const modelInteractionCreate = {
         .setStyle(TextInputStyle.Paragraph);
 
       const startTime = new TextInputBuilder()
-        .setRequired(false)
         .setCustomId("startTime")
         .setLabel("When you started Working?")
+        .setPlaceholder(`12-hours system plz, include "am" or "pm" at the end.`)
 
+        //including "pm" or "am"
+        .setMinLength(6)
+        .setMaxLength(8)
         //Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Short);
 
       const endTime = new TextInputBuilder()
-        .setRequired(false)
         .setCustomId("endTime")
         .setLabel("When you finished working?")
+        .setPlaceholder(`12-hours system plz, include "am" or "pm" at the end.`)
 
+        //including "pm" or "am"
+        .setMinLength(6)
+        .setMaxLength(8)
         //Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Short);
 
@@ -115,16 +122,32 @@ const submitModelInteractionCreate = {
         name: user.globalName,
       };
       await createCheckIn(info);
-      console.log(info);
     } else if (interaction.customId === "dailyCheckOut") {
-      const description = interaction.fields.getTextInputValue("description");
-      const startTime = interaction.fields.getTextInputValue("startTime");
-      const endTime = interaction.fields.getTextInputValue("endTime");
+      let description = interaction.fields.getTextInputValue("description");
+      let startTime = interaction.fields.getTextInputValue("startTime");
+      let endTime = interaction.fields.getTextInputValue("endTime");
+
+      //check if it's 12-hours system with "pm" or "am" at the end.
+      const re = new RegExp("^((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))$");
+      if (!re.test(startTime) || !re.test(endTime)) {
+        await interaction.reply({
+          content:
+            "**Please Type time in the 12 hour format with `AM` or `PM` at the end. `/check-out` again plz**",
+          ephemeral: true,
+        });
+
+        return;
+      }
+
       await interaction.reply({
         content: "Your submission was received successfully!",
         ephemeral: true,
       });
       const user = interaction.user;
+
+      startTime = parseTime(startTime);
+      endTime = parseTime(endTime);
+
       const info = {
         description,
         startTime,
@@ -133,7 +156,6 @@ const submitModelInteractionCreate = {
         name: user.globalName,
       };
       await createCheckOut(info);
-      console.log(info);
     }
   },
 };

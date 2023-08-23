@@ -5,8 +5,8 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
-const {NOTION_CHECKIN_DB_ID,  NOTION_MEMBERS_DB_ID, NOTION_CHECKOUT_DB_ID} = process.env;
-
+const { NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_CHECKOUT_DB_ID } =
+  process.env;
 
 const createMember = async (name) => {
   try {
@@ -45,7 +45,7 @@ const isAval = async (name) => {
       },
     });
     if (!response.results.length) {
-      return false;
+      return await createMember(name);
     }
 
     return response.results[0].id;
@@ -59,9 +59,6 @@ module.exports.createCheckIn = async (fields) => {
   try {
     //the id for the rollup page
     let id = await isAval(fields.name);
-    if (!id) {
-      id = await createMember(fields.name);
-    }
 
     const response = await notion.pages.create({
       parent: {
@@ -111,15 +108,10 @@ module.exports.createCheckIn = async (fields) => {
   }
 };
 
-
-
 module.exports.createCheckOut = async (fields) => {
   try {
     //the id for the rollup page
     let id = await isAval(fields.name);
-    if (!id) {
-      id = await createMember(fields.name);
-    }
 
     const response = await notion.pages.create({
       parent: {
@@ -127,7 +119,7 @@ module.exports.createCheckOut = async (fields) => {
         database_id: NOTION_CHECKOUT_DB_ID,
       },
       properties: {
-        "Description": {
+        Description: {
           title: [
             {
               text: {
@@ -138,8 +130,24 @@ module.exports.createCheckOut = async (fields) => {
         },
         "Start Time": {
           date: {
-            start: ,
-          }
+            start: fields.startTime,
+            end: null,
+            time_zone: "Africa/Cairo",
+          },
+        },
+        "End Time": {
+          date: {
+            start: fields.endTime,
+            end: null,
+            time_zone: "Africa/Cairo",
+          },
+        },
+        "Team Member Relation": {
+          relation: [
+            {
+              id: id,
+            },
+          ],
         },
         "Discord Username": {
           rich_text: [
