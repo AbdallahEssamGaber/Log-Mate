@@ -39,7 +39,7 @@ For development, you will need <ins>**[Node.js](https://nodejs.org/)**</ins> and
 ### Create a Notion Database
 
 1. Create a new [Integration](https://www.notion.so/my-integrations). To link it with your database. Don't forget to copy the integration secret to use later. _[docs if you're stuck!](https://developers.notion.com/docs/create-a-notion-integration#getting-started)_
-2. Create new notion databases with the same properties (from the code) and link the integration with the all databases. _[docs if you're stuck!](https://developers.notion.com/docs/create-a-notion-integration#give-your-integration-page-permissions)_
+2. Create new notion databases with the same properties ([from the code](https://github.com/AbdallahEssamGaber/daily-check-in/blob/master/src/notion.js)) and link the integration with the all databases. _[docs if you're stuck!](https://developers.notion.com/docs/create-a-notion-integration#give-your-integration-page-permissions)_
    <br>
 
 ### Create a Discord Bot
@@ -74,7 +74,7 @@ in the root directory create a `.env` file.
 
 Open `.env` then edit it with your settings. You will need:
 
-> BOT_TOKEN, CLIENT_ID, GUILD_ID, NOTION_TOKEN, NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_CHECKOUT_DB_ID
+> BOT_TOKEN, CLIENT_ID, GUILD_ID, NOTION_TOKEN, NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_CHECKOUT_DB_ID, NOTION_DESCRIPTIONS_DB_ID
 
     BOT_TOKEN=<Discord bot token :string>
     CLIENT_ID=<Discord client id :string>
@@ -83,6 +83,7 @@ Open `.env` then edit it with your settings. You will need:
     NOTION_CHECKIN_DB_ID=<Notion Check-in database token :string>
     NOTION_MEMBERS_DB_ID=<Notion company workers database token :string>
     NOTION_CHECKOUT_DB_ID=<Notion Check-out database token :string>
+    NOTION_DESCRIPTIONS_DB_ID=<Notion All Descriptions database token :string>
 
 <br>
 <br>
