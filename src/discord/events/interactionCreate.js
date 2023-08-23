@@ -6,7 +6,11 @@ const {
   TextInputStyle,
 } = require("discord.js");
 
-const { createCheckIn, createCheckOut } = require("./../../notion");
+const {
+  createCheckIn,
+  createCheckOut,
+  createDescription,
+} = require("./../../notion");
 const parseTime = require("./../../general_modules/parseTime");
 
 const modelInteractionCreate = {
@@ -155,6 +159,7 @@ const submitModelInteractionCreate = {
         username: user.username,
         name: user.globalName,
       };
+      await createDescription(info);
       await createCheckOut(info);
     }
   },

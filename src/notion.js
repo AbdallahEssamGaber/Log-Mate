@@ -5,8 +5,12 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
-const { NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_CHECKOUT_DB_ID } =
-  process.env;
+const {
+  NOTION_CHECKIN_DB_ID,
+  NOTION_MEMBERS_DB_ID,
+  NOTION_CHECKOUT_DB_ID,
+  NOTION_DESCRIPTIONS_DB_ID,
+} = process.env;
 
 const createMember = async (name) => {
   try {
@@ -57,7 +61,7 @@ const isAval = async (name) => {
 //create a notion page
 module.exports.createCheckIn = async (fields) => {
   try {
-    //the id for the rollup page
+    //the id for the rollup db
     let id = await isAval(fields.name);
 
     const response = await notion.pages.create({
@@ -110,7 +114,7 @@ module.exports.createCheckIn = async (fields) => {
 
 module.exports.createCheckOut = async (fields) => {
   try {
-    //the id for the rollup page
+    //the id for the rollup db
     let id = await isAval(fields.name);
 
     const response = await notion.pages.create({
@@ -155,6 +159,41 @@ module.exports.createCheckOut = async (fields) => {
               text: {
                 content: fields.username,
               },
+            },
+          ],
+        },
+      },
+    });
+    console.log(response);
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+module.exports.createDescription = async (fields) => {
+  try {
+    //the id for the rollup team db
+    let id = await isAval(fields.name);
+
+    const response = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: NOTION_DESCRIPTIONS_DB_ID,
+      },
+      properties: {
+        Description: {
+          title: [
+            {
+              text: {
+                content: fields.description,
+              },
+            },
+          ],
+        },
+        "Team Member Relation": {
+          relation: [
+            {
+              id: id,
             },
           ],
         },
