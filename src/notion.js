@@ -55,7 +55,7 @@ const isAval = async (name) => {
 };
 
 //create a notion page
-module.exports = async (fields) => {
+module.exports.createCheckIn = async (fields) => {
   try {
     //the id for the rollup page
     let id = await isAval(fields.name);
