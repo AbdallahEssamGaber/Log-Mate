@@ -123,7 +123,7 @@ module.exports.createTask = async (fields) => {
           title: [
             {
               text: {
-                content: fields.task,
+                content: fields.taskName,
               },
             },
           ],

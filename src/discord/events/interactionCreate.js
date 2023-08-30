@@ -6,11 +6,7 @@ const {
   TextInputStyle,
 } = require("discord.js");
 
-const {
-  createCheckIn,
-  createCheckOut,
-  createDescription,
-} = require("./../../notion");
+const { createCheckIn, createTask } = require("./../../notion");
 const parseTime = require("./../../general_modules/parseTime");
 
 const modelInteractionCreate = {
@@ -50,14 +46,14 @@ const modelInteractionCreate = {
 
       //Show the modal to the user
       await interaction.showModal(modal);
-    } else if (interaction.commandName === "check-out") {
+    } else if (interaction.commandName === "task") {
       const modal = new ModalBuilder()
-        .setCustomId("dailyCheckOut")
-        .setTitle("Daily-Check-Out");
+        .setCustomId("task")
+        .setTitle("Finished a Task");
 
-      const description = new TextInputBuilder()
-        .setCustomId("description")
-        .setLabel("Description of today's")
+      const taskName = new TextInputBuilder()
+        .setCustomId("taskName")
+        .setLabel("What did you finish?")
 
         //Short means only a single line of text
         .setStyle(TextInputStyle.Paragraph);
@@ -86,16 +82,14 @@ const modelInteractionCreate = {
 
       //An action row only holds one text input,
       //so you need one action row per text input.
-      const descriptionActionRow = new ActionRowBuilder().addComponents(
-        description
-      );
+      const taskNameActionRow = new ActionRowBuilder().addComponents(taskName);
       const startTimeActionRow = new ActionRowBuilder().addComponents(
         startTime
       );
       const endTimeActionRow = new ActionRowBuilder().addComponents(endTime);
       //Add inputs to the modal
       modal.addComponents(
-        descriptionActionRow,
+        taskNameActionRow,
         startTimeActionRow,
         endTimeActionRow
       );
@@ -126,8 +120,8 @@ const submitModelInteractionCreate = {
         name: user.globalName,
       };
       await createCheckIn(info);
-    } else if (interaction.customId === "dailyCheckOut") {
-      let description = interaction.fields.getTextInputValue("description");
+    } else if (interaction.customId === "task") {
+      let taskName = interaction.fields.getTextInputValue("taskName");
       let startTime = interaction.fields.getTextInputValue("startTime");
       let endTime = interaction.fields.getTextInputValue("endTime");
 
@@ -153,14 +147,13 @@ const submitModelInteractionCreate = {
       endTime = parseTime(endTime);
 
       const info = {
-        description,
+        taskName,
         startTime,
         endTime,
         username: user.username,
         name: user.globalName,
       };
-      await createDescription(info);
-      await createCheckOut(info);
+      await createTask(info);
     }
   },
 };
