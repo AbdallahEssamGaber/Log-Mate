@@ -7,6 +7,7 @@ const {
 } = require("discord.js");
 
 const { createCheckIn, createTask } = require("./../../notion");
+const { newModal, newInput } = require("./classes");
 const parseTime = require("./../../general_modules/parseTime");
 
 const modelInteractionCreate = {
@@ -15,25 +16,23 @@ const modelInteractionCreate = {
     if (!interaction.isChatInputCommand()) return;
 
     if (interaction.commandName === "check-in") {
-      const modal = new ModalBuilder()
-        .setCustomId("dailyCheckIn")
-        .setTitle("Daily-Check-In");
+      const modal = await newModal("dailyCheckIn", "Daily-Check-In");
 
-      const todayWork = new TextInputBuilder()
-        .setCustomId("todayWork")
-        .setLabel("Planning to work on today")
-        .setPlaceholder("What are you planning to work on today?")
+      const todayWork = await newInput({
+        required: true,
+        id: "todayWork",
+        label: "Planning to work on today",
+        placeholder: "What are you planning to work on today?",
+        style: TextInputStyle.Short,
+      });
 
-        //Short means only a single line of text
-        .setStyle(TextInputStyle.Short);
-
-      const blockers = new TextInputBuilder()
-        .setRequired(false)
-        .setCustomId("blockers")
-        .setLabel("Do you have any blockers?")
-        .setPlaceholder("If so, just tell me. Otherwise please leave me empty")
-        //Paragraph means multiple lines of text.
-        .setStyle(TextInputStyle.Paragraph);
+      const blockers = await newInput({
+        required: false,
+        id: "blockers",
+        label: "Do you have any blockers?",
+        placeholder: "If so, just tell me. Otherwise please leave me empty",
+        style: TextInputStyle.Paragraph,
+      });
 
       //An action row only holds one text input,
       //so you need one action row per text input.
@@ -47,39 +46,34 @@ const modelInteractionCreate = {
       //Show the modal to the user
       await interaction.showModal(modal);
     } else if (interaction.commandName === "task") {
-      const modal = new ModalBuilder()
-        .setCustomId("task")
-        .setTitle("Finished a Task");
+      const modal = await newModal("task", "Finished a Task");
 
-      const taskName = new TextInputBuilder()
-        .setCustomId("taskName")
-        .setLabel("What did you finish?")
+      const taskName = await newInput({
+        required: true,
+        id: "taskName",
+        label: "What did you finish?",
+        style: TextInputStyle.Paragraph,
+      });
 
-        //Short means only a single line of text
-        .setStyle(TextInputStyle.Paragraph);
+      const startTime = await newInput({
+        required: true,
+        id: "startTime",
+        label: "When you started Working?",
+        placeholder: `12-hours system plz, include "am" or "pm" at the end.`,
+        minLength: 6,
+        maxLength: 8,
+        style: TextInputStyle.Short,
+      });
 
-      const startTime = new TextInputBuilder()
-        .setCustomId("startTime")
-        .setLabel("When you started Working?")
-        .setPlaceholder(`12-hours system plz, include "am" or "pm" at the end.`)
-
-        //including "pm" or "am"
-        .setMinLength(6)
-        .setMaxLength(8)
-        //Paragraph means multiple lines of text.
-        .setStyle(TextInputStyle.Short);
-
-      const endTime = new TextInputBuilder()
-        .setCustomId("endTime")
-        .setLabel("When you finished working?")
-        .setPlaceholder(`12-hours system plz, include "am" or "pm" at the end.`)
-
-        //including "pm" or "am"
-        .setMinLength(6)
-        .setMaxLength(8)
-        //Paragraph means multiple lines of text.
-        .setStyle(TextInputStyle.Short);
-
+      const endTime = await newInput({
+        required: true,
+        id: "endTime",
+        label: "When you finished working?",
+        placeholder: `12-hours system plz, include "am" or "pm" at the end.`,
+        minLength: 6,
+        maxLength: 8,
+        style: TextInputStyle.Short,
+      });
       //An action row only holds one text input,
       //so you need one action row per text input.
       const taskNameActionRow = new ActionRowBuilder().addComponents(taskName);

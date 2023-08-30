@@ -10,6 +10,8 @@ module.exports = () => {
 
   for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
+    //Excluding the classes file
+    if (filePath.includes("classes")) continue;
     const { ...events } = require(filePath);
 
     for (const prop in events) {
