@@ -5,12 +5,8 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
-const {
-  NOTION_CHECKIN_DB_ID,
-  NOTION_MEMBERS_DB_ID,
-  NOTION_CHECKOUT_DB_ID,
-  NOTION_DESCRIPTIONS_DB_ID,
-} = process.env;
+const { NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_MASTERTL_DB_ID } =
+  process.env;
 
 const createMember = async (name) => {
   try {
@@ -112,7 +108,7 @@ module.exports.createCheckIn = async (fields) => {
   }
 };
 
-module.exports.createCheckOut = async (fields) => {
+module.exports.createTask = async (fields) => {
   try {
     //the id for the rollup db
     let id = await isAval(fields.name);
@@ -120,14 +116,14 @@ module.exports.createCheckOut = async (fields) => {
     const response = await notion.pages.create({
       parent: {
         type: "database_id",
-        database_id: NOTION_CHECKOUT_DB_ID,
+        database_id: NOTION_MASTERTL_DB_ID,
       },
       properties: {
-        Description: {
+        Task: {
           title: [
             {
               text: {
-                content: fields.description,
+                content: fields.task,
               },
             },
           ],
@@ -145,50 +141,6 @@ module.exports.createCheckOut = async (fields) => {
             end: null,
             time_zone: "Africa/Cairo",
           },
-        },
-        "Team Member Relation": {
-          relation: [
-            {
-              id: id,
-            },
-          ],
-        },
-        "Discord Username": {
-          rich_text: [
-            {
-              text: {
-                content: fields.username,
-              },
-            },
-          ],
-        },
-      },
-    });
-    console.log(response);
-  } catch (error) {
-    console.error(error.body);
-  }
-};
-
-module.exports.createDescription = async (fields) => {
-  try {
-    //the id for the rollup team db
-    let id = await isAval(fields.name);
-
-    const response = await notion.pages.create({
-      parent: {
-        type: "database_id",
-        database_id: NOTION_DESCRIPTIONS_DB_ID,
-      },
-      properties: {
-        Description: {
-          title: [
-            {
-              text: {
-                content: fields.description,
-              },
-            },
-          ],
         },
         "Team Member Relation": {
           relation: [
