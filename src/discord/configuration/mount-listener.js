@@ -1,6 +1,8 @@
+const { messageLink } = require("discord.js");
 const { client } = require("./bot");
 const fs = require("node:fs");
 const path = require("node:path");
+// const { Client } = require("@notionhq/client");
 
 module.exports = () => {
   const eventsPath = path.join(__dirname, "../events");
@@ -23,5 +25,10 @@ module.exports = () => {
         client.on(event.name, (...args) => event.execute(...args));
       }
     }
+    client.on("messageCreate", function (message) {
+      console.log(message);
+      // const channel = client.channels.cache.get("1146801222989389874");
+      // channel.send("sdf");
+    });
   }
 };

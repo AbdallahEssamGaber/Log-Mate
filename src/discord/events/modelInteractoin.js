@@ -222,8 +222,16 @@ const submitSelectMenu = {
   },
 };
 
+const reminder = {
+  name: Events.MessageCreate,
+  async execute(interaction) {
+    console.log("tend");
+  },
+};
+
 module.exports = {
   modelInteractionCreate,
   submitModelInteractionCreate,
   submitSelectMenu,
+  reminder,
 };

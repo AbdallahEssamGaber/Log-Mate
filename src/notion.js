@@ -1,6 +1,8 @@
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
 
+var moment = require("moment"); // require
+moment().format();
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
@@ -152,6 +154,76 @@ module.exports.createTask = async (fields) => {
       },
     });
     console.log(response);
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+// FETCH ALL THE IDS OF THE TEAM.
+const fetchTeamIds = async () => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_MEMBERS_DB_ID,
+    });
+    return response.results;
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+// CHECK EACH ID ITEM WITHIN THE MASTERTL
+const fetchTasks = async (name) => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_MASTERTL_DB_ID,
+      filter: {
+        property: "Team Member",
+        rollup: {
+          any: {
+            rich_text: {
+              equals: name,
+            },
+          },
+        },
+      },
+      sorts: [
+        {
+          property: "Created time",
+          direction: "descending",
+        },
+      ],
+    });
+    const result = response.results[0].properties["End Time"].date.start
+      ? response.results[0].properties["End Time"].date.start
+      : null;
+
+    return result;
+    // console.log(response.results[0].properties.Task);
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+module.exports.notionPreReminder = async () => {
+  try {
+    const teamObj = {};
+    const teamIDs = await fetchTeamIds();
+    for (const item of teamIDs) {
+      const name = item.properties.Name.title[0].plain_text
+        ? item.properties.Name.title[0].plain_text
+        : null;
+      if (!name) continue;
+      const date = await fetchTasks(name);
+      if (!date) {
+        teamObj[name] = true;
+        continue;
+      }
+      const diff = moment(date).fromNow().split(" ");
+      if (diff.includes("hours") && parseInt(diff[0]) >= 4)
+        teamObj[name] = true;
+      else teamObj[name] = false;
+    }
+    return teamObj;
   } catch (error) {
     console.error(error.body);
   }
