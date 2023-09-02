@@ -1,6 +1,8 @@
+const { messageLink } = require("discord.js");
 const { client } = require("./bot");
 const fs = require("node:fs");
 const path = require("node:path");
+// const { Client } = require("@notionhq/client");
 
 module.exports = () => {
   const eventsPath = path.join(__dirname, "../events");
@@ -10,6 +12,8 @@ module.exports = () => {
 
   for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
+    //Excluding the classes file
+    if (filePath.includes("classes")) continue;
     const { ...events } = require(filePath);
 
     for (const prop in events) {

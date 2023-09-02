@@ -1,6 +1,7 @@
 const Bot = require("./bot");
 const deployCommands = require("./deploy-commands");
 const mountListeners = require("./mount-listener");
+const { reminderInterval } = require("./../../interval");
 
 module.exports = async () => {
   while (!Bot.initialized) {
@@ -9,7 +10,7 @@ module.exports = async () => {
   }
 
   await deployCommands(Bot.client);
-
+  reminderInterval();
   //Start the listeners
   mountListeners();
 };
