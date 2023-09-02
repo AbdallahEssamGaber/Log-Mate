@@ -1,15 +1,8 @@
-const {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  SlashCommandBuilder,
-} = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("v")
-    .setDescription("Finished a Task"),
-  async execute(interaction) {
+  data: new SlashCommandBuilder().setName("v").setDescription("embed smth"),
+  async execute(interaction, client) {
     await interaction.reply("fsd");
   },
 };

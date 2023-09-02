@@ -1,7 +1,5 @@
-const { Events, ModalSubmitFields } = require("discord.js");
-
 module.exports.ready = {
-  name: Events.ClientReady,
+  name: "ready",
   once: true, //When the client is ready, run this code (only once)
 
   execute(client) {
