@@ -25,10 +25,5 @@ module.exports = () => {
         client.on(event.name, (...args) => event.execute(...args));
       }
     }
-    client.on("messageCreate", function (message) {
-      console.log(message);
-      // const channel = client.channels.cache.get("1146801222989389874");
-      // channel.send("sdf");
-    });
   }
 };
