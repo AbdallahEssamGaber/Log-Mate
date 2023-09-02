@@ -1,29 +1,15 @@
-const { messageLink } = require("discord.js");
-const { client } = require("./bot");
-const fs = require("node:fs");
-const path = require("node:path");
-// const { Client } = require("@notionhq/client");
+const loadFiles = require("./../../functions/fileLoader");
 
-module.exports = () => {
-  const eventsPath = path.join(__dirname, "../events");
-  const eventFiles = fs
-    .readdirSync(eventsPath)
-    .filter((file) => file.endsWith(".js"));
-
-  for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file);
+module.exports = async (client, files) => {
+  for (const file of files) {
     //Excluding the classes file
-    if (filePath.includes("classes")) continue;
-    const { ...events } = require(filePath);
-
-    for (const prop in events) {
-      const event = events[prop];
-      if (event.once) {
-        //When the client is ready, run this code (only once)
-        client.once(event.name, (...args) => event.execute(...args));
-      } else {
-        client.on(event.name, (...args) => event.execute(...args));
-      }
+    // if (file.includes("classes")) continue;
+    const event = require(file);
+    if (event.once) {
+      //When the client is ready, run this code (only once)
+      client.once(event.name, (...args) => event.execute(...args));
+    } else {
+      client.on(event.name, (...args) => event.execute(...args));
     }
   }
 };

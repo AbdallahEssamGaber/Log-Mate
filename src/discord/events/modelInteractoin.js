@@ -16,8 +16,8 @@ const inputs = [];
 
 const { createCheckIn, createTask } = require("../../notion");
 const { newModal, newInput } = require("./classes");
-const parseTime = require("../../general_modules/parseTime");
-const { addMins, subMins } = require("../../general_modules/timeCalc");
+const parseTime = require("./../../functions/general_modules/parseTime");
+// const { addMins, subMins } = require("./../../functions/general_modules");
 const { logLevelSeverity } = require("@notionhq/client/build/src/logging");
 
 const modelInteractionCreate = {
