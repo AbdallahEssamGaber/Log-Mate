@@ -1,6 +1,5 @@
 const { REST, Routes } = require("discord.js");
 const { CLIENT_ID, GUILD_ID, BOT_TOKEN } = process.env;
-const loadFiles = require("./../../functions/fileLoader");
 
 module.exports = async (client, files) => {
   const commands = [];

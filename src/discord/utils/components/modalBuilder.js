@@ -1,12 +1,26 @@
-const { ModalBuilder, TextInputBuilder } = require("discord.js");
+const {
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+} = require("discord.js");
 
 const newModal = async (id, title) => {
+  if (!id || !title) {
+    throw new Error("Must pass at least (ID, title).");
+  }
   const modal = new ModalBuilder().setCustomId(id).setTitle(title);
-
   return modal;
 };
 
 const newInput = async (prop) => {
+  if (prop.required == undefined || !prop.id || !prop.label || !prop.style) {
+    throw new Error("Must pass at least (required, id, label, style).");
+  }
+
+  if (prop["style"].toLowerCase() == "short") prop.style = TextInputStyle.Short;
+  else if (prop["style"].toLowerCase() == "paragraph")
+    prop.style = TextInputStyle.Paragraph;
+
   const input = new TextInputBuilder()
     .setRequired(prop.required)
 
@@ -18,7 +32,6 @@ const newInput = async (prop) => {
   if (prop.placeholder) input.setPlaceholder(prop.placeholder);
   if (prop.minLength) input.setMinLength(prop.minLength);
   if (prop.maxLength) input.setMaxLength(prop.maxLength);
-
   return input;
 };
 

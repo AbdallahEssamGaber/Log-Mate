@@ -1,5 +1,3 @@
-const loadFiles = require("./../../functions/fileLoader");
-
 module.exports = async (client, files) => {
   for (const file of files) {
     //Excluding the classes file
