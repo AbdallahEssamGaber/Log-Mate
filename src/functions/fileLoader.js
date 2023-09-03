@@ -11,7 +11,6 @@ module.exports = async (dirName) => {
     const jsFiles = files.filter(
       (file) => path.extname(file) == ".js" && !file.includes("fileLoader")
     );
-
     return jsFiles;
   } catch (error) {
     throw error;

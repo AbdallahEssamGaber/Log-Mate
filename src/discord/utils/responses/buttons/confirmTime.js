@@ -1,6 +1,6 @@
 module.exports = {
   data: {
-    name: "addTime",
+    name: "confirmTime",
   },
   async execute(interaction, client) {
     await interaction.reply({

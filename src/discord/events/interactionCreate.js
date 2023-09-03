@@ -3,6 +3,7 @@ const { InteractionType } = require("discord.js");
 module.exports = {
   name: "interactionCreate",
   async execute(interaction, client) {
+    const { buttons, modals, selects } = client;
     if (interaction.isChatInputCommand()) {
       const { commands } = client;
       const { commandName } = interaction;
@@ -18,6 +19,7 @@ module.exports = {
         });
       }
     } else if (interaction.isButton()) {
+      // if (interaction.customId === "confirmTime") return;
       const button = client.buttons.get(interaction.customId);
       if (!button) throw new Error("there is no code for this button.");
       try {
@@ -30,6 +32,14 @@ module.exports = {
       if (!modal) throw new Error("there is no code for this modal.");
       try {
         await modal.execute(interaction, client);
+      } catch (error) {
+        console.error(error.body);
+      }
+    } else if (interaction.isStringSelectMenu()) {
+      const select = selects.get(interaction.customId);
+      if (!select) throw new Error("there is no code for this modal.");
+      try {
+        await select.execute(interaction, client);
       } catch (error) {
         console.error(error.body);
       }
