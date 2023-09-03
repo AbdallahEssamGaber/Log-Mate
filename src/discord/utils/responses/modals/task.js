@@ -65,12 +65,16 @@ module.exports = {
 Chose It's Start and End Time For The Task Below, Please.`,
       components: [row, row2, row3, row4],
     });
-    const filter = (i) => i.user.id === interaction.user.id;
+    const filter = (i) =>
+      i.user.id === interaction.user.id &&
+      (i.customId === "confirmTime" ||
+        i.customId === "startTimeSelector" ||
+        i.customId === "endTimeSelector");
     const collectorButton = interaction.channel.createMessageComponentCollector(
       {
         componentType: ComponentType.Button,
         filter,
-        time: 1000000,
+        time: 100000,
       }
     );
     const collectorSelect = interaction.channel.createMessageComponentCollector(
@@ -86,30 +90,35 @@ Chose It's Start and End Time For The Task Below, Please.`,
       if (taskTimes.hasOwnProperty(customId)) {
         taskTimes[customId] = selection;
       }
-      // console.log(interaction);
       await i.reply({
         content: `*you chose ${selection} from the ${interaction.customId} successfully!*`,
         ephemeral: true,
       });
       setTimeout(() => i.deleteReply(), 1000);
     });
-    collectorButton.on("collect", async (i) => {
-      if (i.customId == "confirmTime") {
-        interaction.editReply({
+    collectorButton.on("collect", async () => {
+      collectorButton.stop();
+    });
+
+    collectorButton.on("end", async () => {
+      collectorSelect.stop();
+
+      console.log("ENDED Selector.");
+      // console.log(collected);
+      if (
+        taskTimes.hasOwnProperty("startTimeSelector") &&
+        taskTimes.hasOwnProperty("endTimeSelector")
+      ) {
+        await response.edit({
           content: `Way to gooo👏👏
 you finished ${taskName} from ${taskTimes.startTimeSelector} until ${taskTimes.endTimeSelector}`,
           components: [],
         });
+      } else {
+        await response.edit({ content: "DONE.", components: [] });
       }
-      console.log("---Collector Button----");
-      // collectorButton._timeout._idleStart = 2;
-      console.log(collectorButton._timeout);
-    });
 
-    collectorButton.on("end", (collected) => {
-      console.log("ENDED.");
-      // console.log(collected);
-      interaction.editReply({ content: "DONE.", components: [] });
+      setTimeout(() => response.delete(), 50000);
     });
   },
 };
