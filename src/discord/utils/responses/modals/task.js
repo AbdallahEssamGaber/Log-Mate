@@ -60,10 +60,56 @@ module.exports = {
     const row4 = new ActionRowBuilder().addComponents(confirm);
 
     let taskName = interaction.fields.getTextInputValue("taskName");
-    await interaction.reply({
+    const response = await interaction.reply({
       content: `\`\`\`Task: ${taskName}✅\`\`\`
 Chose It's Start and End Time For The Task Below, Please.`,
       components: [row, row2, row3, row4],
+    });
+    const filter = (i) => i.user.id === interaction.user.id;
+    const collectorButton = interaction.channel.createMessageComponentCollector(
+      {
+        componentType: ComponentType.Button,
+        filter,
+        time: 1000000,
+      }
+    );
+    const collectorSelect = interaction.channel.createMessageComponentCollector(
+      {
+        componentType: ComponentType.StringSelect,
+        filter,
+      }
+    );
+    const taskTimes = { startTimeSelector: null, endTimeSelector: null };
+    collectorSelect.on("collect", async (i) => {
+      const customId = i.customId;
+      const selection = i.values[0];
+      if (taskTimes.hasOwnProperty(customId)) {
+        taskTimes[customId] = selection;
+      }
+      // console.log(interaction);
+      await i.reply({
+        content: `*you chose ${selection} from the ${interaction.customId} successfully!*`,
+        ephemeral: true,
+      });
+      setTimeout(() => i.deleteReply(), 1000);
+    });
+    collectorButton.on("collect", async (i) => {
+      if (i.customId == "confirmTime") {
+        interaction.editReply({
+          content: `Way to gooo👏👏
+you finished ${taskName} from ${taskTimes.startTimeSelector} until ${taskTimes.endTimeSelector}`,
+          components: [],
+        });
+      }
+      console.log("---Collector Button----");
+      // collectorButton._timeout._idleStart = 2;
+      console.log(collectorButton._timeout);
+    });
+
+    collectorButton.on("end", (collected) => {
+      console.log("ENDED.");
+      // console.log(collected);
+      interaction.editReply({ content: "DONE.", components: [] });
     });
   },
 };

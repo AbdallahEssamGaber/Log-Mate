@@ -19,6 +19,7 @@ module.exports = {
         });
       }
     } else if (interaction.isButton()) {
+      if (interaction.customId === "confirmTime") return;
       const button = client.buttons.get(interaction.customId);
       if (!button) throw new Error("there is no code for this button.");
       try {
@@ -35,6 +36,11 @@ module.exports = {
         console.error(error.body);
       }
     } else if (interaction.isStringSelectMenu()) {
+      if (
+        interaction.customId === "startTimeSelector" ||
+        interaction.customId === "endTimeSelector"
+      )
+        return;
       const select = selects.get(interaction.customId);
       if (!select) throw new Error("there is no code for this modal.");
       try {
