@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@notionhq/client": "^2.2.11",
+    "directory-tree": "^3.5.1",
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",

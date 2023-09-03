@@ -65,40 +65,5 @@ module.exports = {
 Chose It's Start and End Time For The Task Below, Please.`,
       components: [row, row2, row3, row4],
     });
-    // const collectorFilter = (m) => m.customId == "confirmTime";
-    // const collector = interaction.channel.createMessageCollector({
-    //   ComponentType: ComponentType.Button,
-    //   // filter: collectorFilter,
-    //   time: 15000,
-    // });
-
-    // collector.on("collect", (m) => {
-    //   if (m.customId == "confirmTime") {
-    //     console.log("IN");
-    //   }
-    //   console.log(`Collected ${m.content}`);
-    // });
-
-    // collector.on("end", (collected) => {
-    //   console.log(`Collected ${collected.size} items`);
-    // });
-    // const filter = (i) => i.user.id === interaction.user.id;
-    // const collector = interaction.channel.createMessageComponentCollector({
-    //   componentType: ComponentType.Button,
-    //   filter,
-    //   time: 9000,
-    // });
-    // collector.on("collect", async (i) => {
-    //   if (i.customId == "confirmTime") {
-    //     console.log(i);
-    //     i.reply({ content: `Way to goooo👏👏`, ephemeral: true });
-    //   }
-    // });
-
-    // collector.on("end", (collected) => {
-    //   console.log("ENDED.");
-    //   console.log(collected);
-    //   // confirm.setDisabled(true);
-    // });
   },
 };

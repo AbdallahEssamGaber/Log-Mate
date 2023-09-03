@@ -19,7 +19,6 @@ module.exports = {
         });
       }
     } else if (interaction.isButton()) {
-      // if (interaction.customId === "confirmTime") return;
       const button = client.buttons.get(interaction.customId);
       if (!button) throw new Error("there is no code for this button.");
       try {
