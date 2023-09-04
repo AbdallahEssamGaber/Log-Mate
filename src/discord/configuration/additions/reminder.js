@@ -1,8 +1,7 @@
 const cron = require("cron");
 const { notionPreReminder } = require("../../../notion");
 module.exports = async (client) => {
-  let scheduledMessage = new cron.CronJob("*/5 * * * * 0-4", async () => {
-    // This runs every day at 10:30:00, you can do anything you want
+  let scheduledMessage = new cron.CronJob("* * 13-18 * * 0-4", async () => {
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     let channel = guild.channels.cache;
     for (const item of channel.values()) {

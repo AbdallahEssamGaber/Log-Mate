@@ -1,3 +1,6 @@
+const { updateTask } = require("../../../../notion");
+const parseTime = require("./../../../../functions/general/parseTime");
+
 module.exports = {
   data: {
     name: "taskFinishedEntry",
@@ -6,6 +9,8 @@ module.exports = {
   async execute(interaction, client) {
     let startTime = interaction.fields.getTextInputValue("startTimeInput");
     let endTime = interaction.fields.getTextInputValue("endTimeInput");
+    const user = interaction.user;
+
     //check if it's 12-hours system with "pm" or "am" at the end.
     const re = new RegExp("^((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))$");
     if (!re.test(startTime) || !re.test(endTime)) {
@@ -22,5 +27,17 @@ module.exports = {
       content: "Your submission was received successfully!",
       ephemeral: true,
     });
+    startTime = parseTime(startTime);
+    endTime = parseTime(endTime);
+    console.log(startTime, endTime);
+
+    const info = {
+      startTime,
+      endTime,
+      username: user.username,
+      name: user.globalName,
+      userId: user.id,
+    };
+    await updateTask(info);
   },
 };

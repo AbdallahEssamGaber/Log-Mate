@@ -8,9 +8,9 @@ module.exports = {
 
     const additionsFiles = await loadFiles("configuration/additions");
 
-    for (const file of additionsFiles) {
-      require(file)(client);
-    }
+    // for (const file of additionsFiles) {
+    //   require(file)(client);
+    // }
 
     // setInterval(client.pickPresence, 10 * 1000);
     // // console.log(client.pickPresence);

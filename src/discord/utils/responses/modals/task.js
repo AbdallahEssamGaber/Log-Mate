@@ -4,8 +4,9 @@ const {
   newStringSelectMenuBuilder,
   newStringSelectMenuOptionBuilder,
 } = require("../../components/selectMenuBuilder");
+const { createTask } = require("../../../../notion");
 const { addMins, subMins } = require("../../../../functions/general/timeCalc");
-
+const parseTime = require("./../../../../functions/general/parseTime");
 module.exports = {
   data: {
     name: "task",
@@ -63,6 +64,15 @@ module.exports = {
 Chose It's Start and End Time For The Task Below, Please.`,
       components: [row, row2, row3, row4],
     });
+    const user = interaction.user;
+    let info = {
+      taskName,
+      startTime: "2020-12-08T12:00:00Z",
+      endTime: "2020-12-08T12:00:00Z",
+      username: user.username,
+      name: user.globalName,
+      userId: user.id,
+    };
 
     const filter = (i) =>
       i.user.id === interaction.user.id &&
@@ -100,7 +110,8 @@ Chose It's Start and End Time For The Task Below, Please.`,
     collectorButton.on("collect", async (i) => {
       if (i.customId === "addTime") {
         taskTimes.disabled = true;
-        response.delete();
+
+        collectorButton.stop();
       } else if (i.customId === "confirmTime") {
         await collectorButton.stop();
       }
@@ -108,31 +119,34 @@ Chose It's Start and End Time For The Task Below, Please.`,
 
     collectorButton.on("end", async () => {
       collectorSelect.stop();
-      if (taskName.disabled == true) {
-        await response.delete();
-      } else {
-        if (
-          taskTimes.hasOwnProperty("startTimeSelector") &&
-          taskTimes.hasOwnProperty("endTimeSelector") &&
-          taskTimes.disabled !== null
-        ) {
-          await response.edit({
-            content: `Way to gooo👏👏
+      if (
+        taskTimes.hasOwnProperty("startTimeSelector") &&
+        taskTimes.hasOwnProperty("endTimeSelector") &&
+        taskTimes.disabled !== true
+      ) {
+        let startTime = taskTimes.startTimeSelector;
+        let endTime = taskTimes.endTimeSelector;
+        await response.edit({
+          content: `Way to gooo👏👏
 You finished ${taskName} from ${taskTimes.startTimeSelector} until ${taskTimes.endTimeSelector}`,
-            components: [],
-          });
-        } else if (
-          !taskTimes.hasOwnProperty("startTimeSelector") &&
-          !taskTimes.hasOwnProperty("endTimeSelector") &&
-          taskTimes.disabled !== null
-        ) {
-          await response.edit({
-            content: "**Please select values!**",
-            components: [],
-          });
-        } else {
-          await response.delete();
-        }
+          components: [],
+        });
+
+        startTime = parseTime(startTime);
+        endTime = parseTime(endTime);
+        await createTask({ ...info, startTime, endTime });
+      } else if (
+        !taskTimes.hasOwnProperty("startTimeSelector") &&
+        !taskTimes.hasOwnProperty("endTimeSelector") &&
+        taskTimes.disabled !== true
+      ) {
+        await response.edit({
+          content: "**Please select values!**",
+          components: [],
+        });
+      } else {
+        await response.delete();
+        await createTask(info);
       }
     });
   },

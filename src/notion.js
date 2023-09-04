@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
-const { timeLog } = require("console");
+const { timeLog, error } = require("console");
 
 var moment = require("moment"); // require
 moment().format();
@@ -11,7 +11,7 @@ const notion = new Client({
 const { NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_MASTERTL_DB_ID } =
   process.env;
 
-const createMember = async (name) => {
+const createMember = async (fields) => {
   try {
     const response = await notion.pages.create({
       parent: {
@@ -23,7 +23,25 @@ const createMember = async (name) => {
           title: [
             {
               text: {
-                content: name,
+                content: fields.name,
+              },
+            },
+          ],
+        },
+        "Discord Username": {
+          rich_text: [
+            {
+              text: {
+                content: fields.username,
+              },
+            },
+          ],
+        },
+        "Discord UserId": {
+          rich_text: [
+            {
+              text: {
+                content: fields.userId,
               },
             },
           ],
@@ -36,21 +54,61 @@ const createMember = async (name) => {
   }
 };
 
-const isAval = async (name) => {
+const isAval = async (fields) => {
   try {
     const response = await notion.databases.query({
       database_id: NOTION_MEMBERS_DB_ID,
       filter: {
         property: "Name",
         rich_text: {
-          equals: name,
+          equals: fields.name,
         },
       },
     });
     if (!response.results.length) {
-      return await createMember(name);
+      return await createMember(fields);
     }
 
+    return response.results[0].id;
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+const getTaskId = async (fields, id) => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_MASTERTL_DB_ID,
+      filter: {
+        and: [
+          {
+            property: "Team Member Relation",
+            relation: {
+              contains: id,
+            },
+          },
+          {
+            property: "Team Member",
+            rollup: {
+              any: {
+                rich_text: {
+                  equals: fields.name,
+                },
+              },
+            },
+          },
+        ],
+      },
+      sorts: [
+        {
+          property: "Created time",
+          direction: "descending",
+        },
+      ],
+    });
+    if (!response.results.length) {
+      console.error("COULDN'T FIND TASK ID PAGE");
+    }
     return response.results[0].id;
   } catch (error) {
     console.error(error.body);
@@ -60,8 +118,8 @@ const isAval = async (name) => {
 //create a notion page
 module.exports.createCheckIn = async (fields) => {
   try {
-    //the id for the rollup db
-    let id = await isAval(fields.name);
+    //the id for the rollup db for the team
+    let id = await isAval(fields);
 
     const response = await notion.pages.create({
       parent: {
@@ -94,15 +152,6 @@ module.exports.createCheckIn = async (fields) => {
             },
           ],
         },
-        "Discord Username": {
-          rich_text: [
-            {
-              text: {
-                content: fields.username,
-              },
-            },
-          ],
-        },
       },
     });
     console.log(response);
@@ -114,7 +163,7 @@ module.exports.createCheckIn = async (fields) => {
 module.exports.createTask = async (fields) => {
   try {
     //the id for the rollup db
-    let id = await isAval(fields.name);
+    let id = await isAval(fields);
 
     const response = await notion.pages.create({
       parent: {
@@ -151,6 +200,38 @@ module.exports.createTask = async (fields) => {
               id: id,
             },
           ],
+        },
+      },
+    });
+    console.log(response);
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+module.exports.updateTask = async (fields) => {
+  console.log("INSIDE.");
+
+  try {
+    //the id for the rollup db
+    let id = await isAval(fields);
+    let pageId = await getTaskId(fields, id);
+    const response = await notion.pages.update({
+      page_id: pageId,
+      properties: {
+        "Start Time": {
+          date: {
+            start: fields.startTime,
+            end: null,
+            time_zone: "Africa/Cairo",
+          },
+        },
+        "End Time": {
+          date: {
+            start: fields.endTime,
+            end: null,
+            time_zone: "Africa/Cairo",
+          },
         },
       },
     });
