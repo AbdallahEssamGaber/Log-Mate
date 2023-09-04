@@ -14,8 +14,9 @@ class Bot {
     });
 
     this.client.commands = new Collection();
-
-    await this.client.login(process.env.BOT_TOKEN);
+    this.client.buttons = new Collection();
+    this.client.modals = new Collection();
+    this.client.selects = new Collection();
 
     this.initialized = true;
 

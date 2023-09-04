@@ -1,20 +1,12 @@
 const { REST, Routes } = require("discord.js");
 const { CLIENT_ID, GUILD_ID, BOT_TOKEN } = process.env;
-const fs = require("node:fs");
-const path = require("node:path");
 
-module.exports = async (client) => {
+module.exports = async (client, files) => {
   const commands = [];
 
   //Grab all the command files from the commands directory
-  const commandsPath = path.join(__dirname, "../commands");
-  const commandFiles = fs
-    .readdirSync(commandsPath)
-    .filter((file) => file.endsWith(".js"));
-
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
+  for (const file of files) {
+    const command = require(file);
 
     //Set a new item in the Collection with the key as the command name and the value as the exported module
     if ("data" in command && "execute" in command) {

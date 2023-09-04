@@ -118,3 +118,5 @@ dist
 .flaskenv*
 !.env.project
 !.env.vault
+test.js
+register-commands.js
