@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
+const { timeLog } = require("console");
 
 var moment = require("moment"); // require
 moment().format();
@@ -209,19 +210,28 @@ module.exports.notionPreReminder = async () => {
     const teamObj = {};
     const teamIDs = await fetchTeamIds();
     for (const item of teamIDs) {
-      const name = item.properties.Name.title[0].plain_text
-        ? item.properties.Name.title[0].plain_text
-        : null;
+      const title = item.properties.Name.title[0];
+      const richText = item.properties["Discord UserId"].rich_text[0];
+      const name = title ? title.plain_text : null;
+      const discordUsername = richText ? richText.plain_text : null;
+
       if (!name) continue;
       const date = await fetchTasks(name);
+      if (!discordUsername) {
+        console.error(`username not aval in Notion for ${name}`);
+        continue;
+      }
       if (!date) {
-        teamObj[name] = true;
+        teamObj[discordUsername] = true;
         continue;
       }
       const diff = moment(date).fromNow().split(" ");
-      if (diff.includes("hours") && parseInt(diff[0]) >= 4)
-        teamObj[name] = true;
-      else teamObj[name] = false;
+      if (
+        diff.includes("hours") &&
+        (parseInt(diff[0]) >= 4 || parseInt(diff[1]) >= 4)
+      )
+        teamObj[discordUsername] = true;
+      else teamObj[discordUsername] = false;
     }
     return teamObj;
   } catch (error) {

@@ -18,8 +18,6 @@ class Bot {
     this.client.modals = new Collection();
     this.client.selects = new Collection();
 
-    await this.client.login(process.env.BOT_TOKEN);
-
     this.initialized = true;
 
     return this;
