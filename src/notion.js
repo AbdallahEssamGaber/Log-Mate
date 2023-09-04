@@ -210,8 +210,6 @@ module.exports.createTask = async (fields) => {
 };
 
 module.exports.updateTask = async (fields) => {
-  console.log("INSIDE.");
-
   try {
     //the id for the rollup db
     let id = await isAval(fields);

@@ -29,7 +29,6 @@ module.exports = {
     });
     startTime = parseTime(startTime);
     endTime = parseTime(endTime);
-    console.log(startTime, endTime);
 
     const info = {
       startTime,

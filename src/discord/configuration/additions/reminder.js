@@ -1,7 +1,7 @@
 const cron = require("cron");
 const { notionPreReminder } = require("../../../notion");
 module.exports = async (client) => {
-  let scheduledMessage = new cron.CronJob("* * 13-18 * * 0-4", async () => {
+  let scheduledMessage = new cron.CronJob("0 0 14-19/4 * * 0-4", async () => {
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     let channel = guild.channels.cache;
     for (const item of channel.values()) {
