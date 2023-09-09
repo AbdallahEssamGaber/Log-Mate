@@ -4,12 +4,18 @@ const { timeLog, error } = require("console");
 
 var moment = require("moment"); // require
 moment().format();
+const {
+  NOTION_TOKEN,
+  NOTION_CHECKIN_DB_ID,
+  NOTION_MEMBERS_DB_ID,
+  NOTION_TASKS_DB_ID,
+} = process.env;
+
 const notion = new Client({
-  auth: process.env.NOTION_TOKEN,
+  auth: NOTION_TOKEN,
 });
 
-const { NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_MASTERTL_DB_ID } =
-  process.env;
+const createCheckInTasks = async () => {};
 
 const createMember = async (fields) => {
   try {
@@ -115,28 +121,30 @@ const getTaskId = async (fields, id) => {
   }
 };
 
-//create a notion page
-module.exports.createCheckIn = async (fields) => {
+const checkIn = async (i, fields) => {
   try {
     //the id for the rollup db for the team
     let id = await isAval(fields);
-
+    const titleContent =
+      fields.todayWork[i] +
+      " Check in " +
+      new Date().toLocaleDateString("en-GB");
     const response = await notion.pages.create({
       parent: {
         type: "database_id",
         database_id: NOTION_CHECKIN_DB_ID,
       },
       properties: {
-        "today work": {
+        Name: {
           title: [
             {
               text: {
-                content: fields.todayWork,
+                content: titleContent,
               },
             },
           ],
         },
-        "Team Member Relation": {
+        "Team Member": {
           relation: [
             {
               id: id,
@@ -149,6 +157,50 @@ module.exports.createCheckIn = async (fields) => {
               text: {
                 content: fields.blockers,
               },
+            },
+          ],
+        },
+      },
+    });
+    console.log(response);
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+//create a notion page
+module.exports.createCheckIn = async (fields) => {
+  fields.todayWorks = fields.todayWorks.split("\n");
+  for (let i = 0; i < fields.todayWorks.length; i++) {
+    await checkIn(i, fields);
+    await task(fields);
+  }
+};
+
+const task = async (i, fields) => {
+  try {
+    //the id for the rollup db
+    const id = await isAval(fields);
+
+    const response = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: NOTION_TASKS_DB_ID,
+      },
+      properties: {
+        Task: {
+          title: [
+            {
+              text: {
+                content: fields.taskName || fields.todayWorks[i],
+              },
+            },
+          ],
+        },
+        "Team Member": {
+          relation: [
+            {
+              id: id,
             },
           ],
         },
