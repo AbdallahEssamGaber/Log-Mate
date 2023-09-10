@@ -3,10 +3,9 @@ const { InteractionType } = require("discord.js");
 module.exports = {
   name: "interactionCreate",
   async execute(interaction, client) {
-    const { buttons, modals, selects } = client;
+    const { buttons, modals, selects, commands } = client;
+    const { commandName } = interaction;
     if (interaction.isChatInputCommand()) {
-      const { commands } = client;
-      const { commandName } = interaction;
       const command = commands.get(commandName);
       if (!command) return;
       try {
@@ -20,7 +19,7 @@ module.exports = {
       }
     } else if (interaction.isButton()) {
       if (interaction.customId === "confirmTime") return;
-      const button = client.buttons.get(interaction.customId);
+      const button = buttons.get(interaction.customId);
       if (!button) throw new Error("there is no code for this button.");
       try {
         await button.execute(interaction, client);
@@ -28,7 +27,7 @@ module.exports = {
         console.error(error.body);
       }
     } else if (interaction.type === InteractionType.ModalSubmit) {
-      const modal = client.modals.get(interaction.customId);
+      const modal = modals.get(interaction.customId);
       if (!modal) throw new Error("there is no code for this modal.");
       try {
         await modal.execute(interaction, client);
@@ -45,6 +44,14 @@ module.exports = {
       if (!select) throw new Error("there is no code for this modal.");
       try {
         await select.execute(interaction, client);
+      } catch (error) {
+        console.error(error.body);
+      }
+    } else if (interaction.isAutocomplete()) {
+      const command = commands.get(commandName);
+      if (!command) return;
+      try {
+        await command.autocomplete(interaction);
       } catch (error) {
         console.error(error.body);
       }

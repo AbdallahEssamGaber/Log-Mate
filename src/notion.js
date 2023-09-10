@@ -33,7 +33,7 @@ const createMember = async (fields) => {
         database_id: NOTION_MEMBERS_DB_ID,
       },
       properties: {
-        Name: {
+        [NOTION_TAG_NAME]: {
           title: [
             {
               text: {
@@ -42,7 +42,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        "Discord Username": {
+        [NOTION_MEMBERS_TAG_USERNAME]: {
           rich_text: [
             {
               text: {
@@ -51,7 +51,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        "Discord UserId": {
+        [NOTION_MEMBERS_TAG_USERID]: {
           rich_text: [
             {
               text: {
@@ -73,7 +73,7 @@ const isAvail = async (fields) => {
     const response = await notion.databases.query({
       database_id: NOTION_MEMBERS_DB_ID,
       filter: {
-        property: "Name",
+        property: NOTION_TAG_NAME,
         rich_text: {
           equals: fields.name,
         },
@@ -184,6 +184,27 @@ const createCheckInTasks = async (fields) => {
     for (let i = 0; i < fields.todayWorks.length; i++) {
       await createTask(memberID, checkID, fields.todayWorks[i]);
     }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const fetchUserID = async (userID) => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_MEMBERS_DB_ID,
+      filter: {
+        property: "Name",
+        rich_text: {
+          equals: fields.name,
+        },
+      },
+    });
+    if (!response.results.length) {
+      return await createMember(fields);
+    }
+
+    return response.results[0].id;
   } catch (error) {
     console.error(error);
   }

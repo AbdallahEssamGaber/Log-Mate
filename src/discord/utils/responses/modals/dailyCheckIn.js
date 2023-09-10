@@ -24,6 +24,6 @@ module.exports = {
       content: msg,
     });
 
-    // await createCheckInTasks(info);
+    await createCheckInTasks(info);
   },
 };
