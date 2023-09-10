@@ -1,5 +1,13 @@
 const { SlashCommandBuilder } = require("discord.js");
 
+const { newModal, newInput } = require("../utils/components/modalBuilder.js");
+
+const { fetchTasksUsers } = require("../../notion");
+
+let tasks;
+(async () => {
+  tasks = await fetchTasksUsers();
+})();
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("log")
@@ -14,16 +22,9 @@ module.exports = {
         .setRequired(true)
     ),
   async autocomplete(interaction) {
-    const userID = interaction.user.id;
+    tasks = [...tasks[interaction.user.globalName], "NEW TASK"];
     const focusedValue = interaction.options.getFocused();
-    console.log(interaction);
-    const choices = [
-      "Popular Topics: Threads",
-      "Sharding: Getting started",
-      "Library: Voice Connections",
-      "Interactions: Replying to slash commands",
-      "Popular Topics: Embed preview",
-    ];
+    const choices = tasks;
     const filtered = choices.filter((choice) =>
       choice.startsWith(focusedValue)
     );
@@ -32,7 +33,27 @@ module.exports = {
     );
   },
   async execute(interaction) {
-    const option = interaction.options.getString("task");
-    await interaction.reply({ content: `You told me, "${option}"` });
+    const chose = interaction.options.getString("task");
+
+    // if (chose === "NEW TASK") {
+    //   const modal = await newModal("addTask", "Add a task");
+
+    //   const taskName = await newInput({
+    //     required: true,
+    //     id: "taskName",
+    //     label: "Name of the new task?",
+    //     style: "short",
+    //   });
+
+    //   //An action row only holds one text input,
+    //   //so you need one action row per text input.
+    //   //Add inputs to the modal
+    //   modal.addComponents(new ActionRowBuilder().addComponents(taskName));
+
+    //   //Show the modal to the user
+    //   await interaction.showModal(modal);
+    // }
+
+    await interaction.reply({ content: `You told me, "${chose}"` });
   },
 };

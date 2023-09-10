@@ -1,7 +1,5 @@
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
-const { timeLog, error } = require("console");
-const { REST } = require("discord.js");
 
 var moment = require("moment"); // require
 moment().format();
@@ -68,19 +66,19 @@ const createMember = async (fields) => {
   }
 };
 
-const isAvail = async (fields) => {
+const isAvail = async (memberName) => {
   try {
     const response = await notion.databases.query({
       database_id: NOTION_MEMBERS_DB_ID,
       filter: {
         property: NOTION_TAG_NAME,
         rich_text: {
-          equals: fields.name,
+          equals: memberName,
         },
       },
     });
     if (!response.results.length) {
-      return await createMember(fields);
+      return null;
     }
 
     return response.results[0].id;
@@ -189,24 +187,52 @@ const createCheckInTasks = async (fields) => {
   }
 };
 
-const fetchUserID = async (userID) => {
+const getMemberName = async (id) => {
   try {
-    const response = await notion.databases.query({
-      database_id: NOTION_MEMBERS_DB_ID,
-      filter: {
-        property: "Name",
-        rich_text: {
-          equals: fields.name,
-        },
-      },
+    const response = await notion.pages.retrieve({
+      page_id: id,
     });
-    if (!response.results.length) {
-      return await createMember(fields);
-    }
-
-    return response.results[0].id;
+    return response.properties.Name.title[0].plain_text;
   } catch (error) {
     console.error(error);
+  }
+};
+
+const fetchTasksUsers = async () => {
+  try {
+    // const memberID = await isAvail(memberName);
+    // if (!memberID) {
+    //   console.log("sdf");
+    //   return null;
+    // }
+    const response = await notion.databases.query({
+      database_id: NOTION_TASKS_DB_ID,
+      // filter: {
+      //   property: NOTION_TASKS_TAG_MEMBER,
+      //   relation: {
+      //     contains: memberID,
+      //   },
+      // },
+    });
+    if (!response.results.length) {
+      return null;
+    }
+
+    let tasks = {};
+    for (const result of response.results) {
+      const memberName = await getMemberName(
+        result.properties["Team Member"].relation[0].id
+      );
+      tasks[memberName] = !tasks[memberName]
+        ? [result.properties.Name.title[0].plain_text]
+        : (tasks[memberName] = [
+            ...tasks[memberName],
+            result.properties.Name.title[0].plain_text,
+          ]);
+    }
+    return tasks;
+  } catch (error) {
+    console.error(error.body);
   }
 };
 
@@ -289,4 +315,4 @@ module.exports.notionPreReminder = async () => {
   }
 };
 
-module.exports = { createCheckInTasks };
+module.exports = { createCheckInTasks, fetchTasksUsers };
