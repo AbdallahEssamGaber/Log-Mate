@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
 const { timeLog, error } = require("console");
+const { REST } = require("discord.js");
 
 var moment = require("moment"); // require
 moment().format();
@@ -9,13 +10,20 @@ const {
   NOTION_CHECKIN_DB_ID,
   NOTION_MEMBERS_DB_ID,
   NOTION_TASKS_DB_ID,
+  NOTION_CHECKIN_TAG_MEMBER,
+  NOTION_CHECKIN_TAG_BLOCKERS,
+  NOTION_MEMBERS_TAG_USERID,
+  NOTION_MEMBERS_TAG_USERNAME,
+  NOTION_TASKS_TAG_MEMBER,
+  NOTION_TASKS_TAG_STTIME,
+  NOTION_TASKS_TAG_ENTIME,
+  NOTION_TASKS_TAG_CHECKS,
+  NOTION_TAG_NAME,
 } = process.env;
 
 const notion = new Client({
   auth: NOTION_TOKEN,
 });
-
-const createCheckInTasks = async () => {};
 
 const createMember = async (fields) => {
   try {
@@ -25,7 +33,7 @@ const createMember = async (fields) => {
         database_id: NOTION_MEMBERS_DB_ID,
       },
       properties: {
-        Name: {
+        [NOTION_TAG_NAME]: {
           title: [
             {
               text: {
@@ -34,7 +42,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        "Discord Username": {
+        [NOTION_MEMBERS_TAG_USERNAME]: {
           rich_text: [
             {
               text: {
@@ -43,7 +51,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        "Discord UserId": {
+        [NOTION_MEMBERS_TAG_USERID]: {
           rich_text: [
             {
               text: {
@@ -60,7 +68,128 @@ const createMember = async (fields) => {
   }
 };
 
-const isAval = async (fields) => {
+const isAvail = async (fields) => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_MEMBERS_DB_ID,
+      filter: {
+        property: NOTION_TAG_NAME,
+        rich_text: {
+          equals: fields.name,
+        },
+      },
+    });
+    if (!response.results.length) {
+      return await createMember(fields);
+    }
+
+    return response.results[0].id;
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+const createCheckIn = async (memberID, checkName, fields) => {
+  try {
+    const response = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: NOTION_CHECKIN_DB_ID,
+      },
+      properties: {
+        [NOTION_TAG_NAME]: {
+          title: [
+            {
+              text: {
+                content: checkName,
+              },
+            },
+          ],
+        },
+        [NOTION_CHECKIN_TAG_MEMBER]: {
+          relation: [
+            {
+              id: memberID,
+            },
+          ],
+        },
+        [NOTION_CHECKIN_TAG_BLOCKERS]: {
+          rich_text: [
+            {
+              text: {
+                content: fields.blockers,
+              },
+            },
+          ],
+        },
+      },
+    });
+    console.log(response);
+    return response.id;
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+const createTask = async (memberID, checkID, taskName) => {
+  try {
+    const response = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: NOTION_TASKS_DB_ID,
+      },
+      properties: {
+        [NOTION_TAG_NAME]: {
+          title: [
+            {
+              text: {
+                content: taskName,
+              },
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_MEMBER]: {
+          relation: [
+            {
+              id: memberID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_CHECKS]: {
+          relation: [
+            {
+              id: checkID,
+            },
+          ],
+        },
+      },
+    });
+    console.log(response);
+  } catch (error) {
+    console.error(error.body);
+  }
+};
+
+const createCheckInTasks = async (fields) => {
+  try {
+    //the id for the rollup db for the team member
+    const memberID = await isAvail(fields);
+    let date = new Date().toLocaleDateString("en-GB");
+    date = date
+      .replace(date.substring(6), date.slice(-2))
+      .replace(/(^|\/)0+/g, "$1");
+    const checkName = fields.name + " Check in " + date;
+    const checkID = await createCheckIn(memberID, checkName, fields);
+    fields.todayWorks = fields.todayWorks.split("\n");
+    for (let i = 0; i < fields.todayWorks.length; i++) {
+      await createTask(memberID, checkID, fields.todayWorks[i]);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const fetchUserID = async (userID) => {
   try {
     const response = await notion.databases.query({
       database_id: NOTION_MEMBERS_DB_ID,
@@ -77,217 +206,7 @@ const isAval = async (fields) => {
 
     return response.results[0].id;
   } catch (error) {
-    console.error(error.body);
-  }
-};
-
-const getTaskId = async (fields, id) => {
-  try {
-    const response = await notion.databases.query({
-      database_id: NOTION_MASTERTL_DB_ID,
-      filter: {
-        and: [
-          {
-            property: "Team Member Relation",
-            relation: {
-              contains: id,
-            },
-          },
-          {
-            property: "Team Member",
-            rollup: {
-              any: {
-                rich_text: {
-                  equals: fields.name,
-                },
-              },
-            },
-          },
-        ],
-      },
-      sorts: [
-        {
-          property: "Created time",
-          direction: "descending",
-        },
-      ],
-    });
-    if (!response.results.length) {
-      console.error("COULDN'T FIND TASK ID PAGE");
-    }
-    return response.results[0].id;
-  } catch (error) {
-    console.error(error.body);
-  }
-};
-
-const checkIn = async (i, fields) => {
-  try {
-    //the id for the rollup db for the team
-    let id = await isAval(fields);
-    const titleContent =
-      fields.todayWork[i] +
-      " Check in " +
-      new Date().toLocaleDateString("en-GB");
-    const response = await notion.pages.create({
-      parent: {
-        type: "database_id",
-        database_id: NOTION_CHECKIN_DB_ID,
-      },
-      properties: {
-        Name: {
-          title: [
-            {
-              text: {
-                content: titleContent,
-              },
-            },
-          ],
-        },
-        "Team Member": {
-          relation: [
-            {
-              id: id,
-            },
-          ],
-        },
-        blockers: {
-          rich_text: [
-            {
-              text: {
-                content: fields.blockers,
-              },
-            },
-          ],
-        },
-      },
-    });
-    console.log(response);
-  } catch (error) {
-    console.error(error.body);
-  }
-};
-
-//create a notion page
-module.exports.createCheckIn = async (fields) => {
-  fields.todayWorks = fields.todayWorks.split("\n");
-  for (let i = 0; i < fields.todayWorks.length; i++) {
-    await checkIn(i, fields);
-    await task(fields);
-  }
-};
-
-const task = async (i, fields) => {
-  try {
-    //the id for the rollup db
-    const id = await isAval(fields);
-
-    const response = await notion.pages.create({
-      parent: {
-        type: "database_id",
-        database_id: NOTION_TASKS_DB_ID,
-      },
-      properties: {
-        Task: {
-          title: [
-            {
-              text: {
-                content: fields.taskName || fields.todayWorks[i],
-              },
-            },
-          ],
-        },
-        "Team Member": {
-          relation: [
-            {
-              id: id,
-            },
-          ],
-        },
-      },
-    });
-    console.log(response);
-  } catch (error) {
-    console.error(error.body);
-  }
-};
-
-module.exports.createTask = async (fields) => {
-  try {
-    //the id for the rollup db
-    let id = await isAval(fields);
-
-    const response = await notion.pages.create({
-      parent: {
-        type: "database_id",
-        database_id: NOTION_MASTERTL_DB_ID,
-      },
-      properties: {
-        Task: {
-          title: [
-            {
-              text: {
-                content: fields.taskName,
-              },
-            },
-          ],
-        },
-        "Start Time": {
-          date: {
-            start: fields.startTime,
-            end: null,
-            time_zone: "Africa/Cairo",
-          },
-        },
-        "End Time": {
-          date: {
-            start: fields.endTime,
-            end: null,
-            time_zone: "Africa/Cairo",
-          },
-        },
-        "Team Member Relation": {
-          relation: [
-            {
-              id: id,
-            },
-          ],
-        },
-      },
-    });
-    console.log(response);
-  } catch (error) {
-    console.error(error.body);
-  }
-};
-
-module.exports.updateTask = async (fields) => {
-  try {
-    //the id for the rollup db
-    let id = await isAval(fields);
-    let pageId = await getTaskId(fields, id);
-    const response = await notion.pages.update({
-      page_id: pageId,
-      properties: {
-        "Start Time": {
-          date: {
-            start: fields.startTime,
-            end: null,
-            time_zone: "Africa/Cairo",
-          },
-        },
-        "End Time": {
-          date: {
-            start: fields.endTime,
-            end: null,
-            time_zone: "Africa/Cairo",
-          },
-        },
-      },
-    });
-    console.log(response);
-  } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
@@ -369,3 +288,5 @@ module.exports.notionPreReminder = async () => {
     console.error(error.body);
   }
 };
+
+module.exports = { createCheckInTasks };
