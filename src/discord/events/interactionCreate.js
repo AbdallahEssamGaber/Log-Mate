@@ -5,16 +5,16 @@ module.exports = {
   async execute(interaction, client) {
     const { buttons, modals, selects, commands } = client;
     const { commandName } = interaction;
-    if (interaction.isChatInputCommand()) {
-      const argAutocomplete = interaction.options.getString("task");
-      if (argAutocomplete) {
-        // try {
-        //   await
-        // } catch (error) {
-        //   console.error(error.body);
-        // }
-        // Handle args for autocomplete
+    if (interaction.type == InteractionType.ApplicationCommandAutocomplete) {
+      const command = commands.get(commandName);
+      if (!command) return;
+      try {
+        await command.autocomplete(interaction);
+      } catch (error) {
+        console.error(error.body);
       }
+    } else if (interaction.isChatInputCommand()) {
+      const argAutocomplete = interaction.options.getString("task");
       const command = commands.get(commandName);
       if (!command) return;
       try {
@@ -53,14 +53,6 @@ module.exports = {
       if (!select) throw new Error("there is no code for this modal.");
       try {
         await select.execute(interaction, client);
-      } catch (error) {
-        console.error(error.body);
-      }
-    } else if (interaction.isAutocomplete()) {
-      const command = commands.get(commandName);
-      if (!command) return;
-      try {
-        await command.autocomplete(interaction);
       } catch (error) {
         console.error(error.body);
       }
