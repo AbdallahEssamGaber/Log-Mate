@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
 
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
@@ -8,7 +8,6 @@ const { log } = require("console");
 let tasks;
 (async () => {
   tasks = await fetchTasksUsers();
-  console.log(tasks);
 })();
 module.exports = {
   data: new SlashCommandBuilder()
@@ -36,25 +35,25 @@ module.exports = {
   async execute(interaction) {
     const chose = interaction.options.getString("task");
 
-    // if (chose === "NEW TASK") {
-    //   const modal = await newModal("addTask", "Add a task");
+    if (chose === "NEW TASK") {
+      const modal = await newModal("addTask", "Add a task");
 
-    //   const taskName = await newInput({
-    //     required: true,
-    //     id: "taskName",
-    //     label: "Name of the new task?",
-    //     style: "short",
-    //   });
+      const taskName = await newInput({
+        required: true,
+        id: "taskName",
+        label: "Name of the new task?",
+        style: "short",
+      });
 
-    //   //An action row only holds one text input,
-    //   //so you need one action row per text input.
-    //   //Add inputs to the modal
-    //   modal.addComponents(new ActionRowBuilder().addComponents(taskName));
+      //An action row only holds one text input,
+      //so you need one action row per text input.
+      //Add inputs to the modal
+      modal.addComponents(new ActionRowBuilder().addComponents(taskName));
 
-    //   //Show the modal to the user
-    //   await interaction.showModal(modal);
-    // }
-
-    await interaction.reply({ content: `You told me, "${chose}"` });
+      //Show the modal to the user
+      await interaction.showModal(modal);
+    } else {
+      await interaction.reply({ content: `You told me, "${chose}"` });
+    }
   },
 };

@@ -7,11 +7,12 @@ module.exports = {
     const { commandName } = interaction;
     if (interaction.isChatInputCommand()) {
       const command = commands.get(commandName);
-      if (!command) return;
+      if (!command) return console.log("Command was not found");
       try {
         await command.execute(interaction);
       } catch (error) {
-        console.error(error.body);
+        console.log(command);
+        console.error(error);
         await interaction.reply({
           content: "Something went wrong while executing command",
           ephemeral: true,
@@ -24,7 +25,7 @@ module.exports = {
       try {
         await button.execute(interaction, client);
       } catch (error) {
-        console.error(error.body);
+        console.error(error);
       }
     } else if (interaction.type === InteractionType.ModalSubmit) {
       const modal = modals.get(interaction.customId);
@@ -32,7 +33,7 @@ module.exports = {
       try {
         await modal.execute(interaction, client);
       } catch (error) {
-        console.error(error.body);
+        console.error(error);
       }
     } else if (interaction.isStringSelectMenu()) {
       if (
@@ -45,7 +46,20 @@ module.exports = {
       try {
         await select.execute(interaction, client);
       } catch (error) {
-        console.error(error.body);
+        console.error(error);
+      }
+    } else if (interaction.isAutocomplete()) {
+      const command = commands.get(commandName);
+      if (!command) return console.log("Command was not found");
+
+      if (!command.autocomplete)
+        return console.error(
+          `No autocomplete handler was found for the ${interaction.commandName} command.`
+        );
+      try {
+        await command.autocomplete(interaction);
+      } catch (error) {
+        console.error(error);
       }
     }
   },
