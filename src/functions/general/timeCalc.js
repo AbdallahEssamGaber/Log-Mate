@@ -1,4 +1,5 @@
 module.exports.addMins = (intMin) => {
+  let dateObj = [];
   const numberOfMlSeconds = new Date().getTime();
 
   //if you wanna add hours parse min*60
@@ -6,14 +7,25 @@ module.exports.addMins = (intMin) => {
   let newDateObj = new Date(numberOfMlSeconds + addMlSeconds);
   newDateObj.setMinutes(0, 0);
 
-  newDateObj = newDateObj.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return newDateObj;
+  dateObj.push(
+    newDateObj.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  );
+  newDateObj.setMinutes(30, 0);
+  dateObj.push(
+    newDateObj.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  );
+
+  return dateObj;
 };
 
 module.exports.subMins = (intMin) => {
+  let dateObj = [];
   const numberOfMlSeconds = new Date().getTime();
 
   //if you wanna add hours parse min*60
@@ -21,9 +33,19 @@ module.exports.subMins = (intMin) => {
   let newDateObj = new Date(numberOfMlSeconds - addMlSeconds);
   newDateObj.setMinutes(0, 0);
 
-  newDateObj = newDateObj.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return newDateObj;
+  dateObj.push(
+    newDateObj.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  );
+  newDateObj.setMinutes(30, 0);
+  dateObj.push(
+    newDateObj.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  );
+
+  return dateObj;
 };

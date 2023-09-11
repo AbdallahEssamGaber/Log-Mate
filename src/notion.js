@@ -2,6 +2,7 @@ require("dotenv").config();
 const { Client } = require("@notionhq/client");
 
 var moment = require("moment"); // require
+const { fileURLToPath } = require("url");
 moment().format();
 const {
   NOTION_TOKEN,
@@ -64,28 +65,34 @@ const createMember = async (fields) => {
     });
     return response.id;
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
-const isAvail = async (memberName) => {
+const isAvail = async (fields) => {
   try {
     const response = await notion.databases.query({
       database_id: NOTION_MEMBERS_DB_ID,
       filter: {
-        property: NOTION_TAG_NAME,
+        property: NOTION_MEMBERS_TAG_USERID,
         rich_text: {
-          equals: memberName,
+          equals: fields.userId,
         },
       },
     });
     if (!response.results.length) {
+      //it's a check-in
+      if (fields["startTime"] === undefined) {
+        console.log("creating new member");
+        const id = await createMember(fields);
+        return id;
+      }
       return null;
     }
 
     return response.results[0].id;
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
@@ -127,7 +134,7 @@ const createCheckIn = async (memberID, checkName, fields) => {
     console.log(response);
     return response.id;
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
@@ -166,7 +173,7 @@ const createTask = async (memberID, checkID, taskName) => {
     });
     console.log(response);
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
@@ -205,26 +212,15 @@ const fetchTasksUsers = async () => {
     const response = await notion.databases.query({
       database_id: NOTION_TASKS_DB_ID,
       filter: {
-        and: [
-          {
-            property: NOTION_TASKS_TAG_CREATEDTIME,
-            date: {
-              equals: new Date().toISOString().split("T")[0],
-            },
-          },
-          {
-            property: NOTION_TASKS_TAG_DONE,
-            checkbox: {
-              equals: false,
-            },
-          },
-        ],
+        property: NOTION_TASKS_TAG_DONE,
+        checkbox: {
+          does_not_equal: true,
+        },
       },
     });
     if (!response.results.length) {
       return null;
     }
-
     let tasks = {};
     for (const result of response.results) {
       const memberName = await getMemberName(
@@ -239,7 +235,63 @@ const fetchTasksUsers = async () => {
     }
     return tasks;
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
+  }
+};
+
+const logTask = async (fields) => {
+  try {
+    const memberID = await isAvail(fields);
+    if (!memberID) return console.log("User not found.");
+
+    const responseID = await notion.databases.query({
+      database_id: NOTION_TASKS_DB_ID,
+      filter: {
+        and: [
+          {
+            property: NOTION_TASKS_TAG_MEMBER,
+            relation: {
+              contains: memberID,
+            },
+          },
+          {
+            property: NOTION_TASKS_TAG_DONE,
+            checkbox: {
+              does_not_equal: true,
+            },
+          },
+          {
+            property: NOTION_TAG_NAME,
+            rich_text: {
+              equals: fields.chose,
+            },
+          },
+        ],
+      },
+    });
+
+    if (!responseID.results.length) return console.log("Task not found.");
+    const response = await notion.pages.update({
+      page_id: responseID.results[0].id,
+      properties: {
+        [NOTION_TASKS_TAG_STTIME]: {
+          date: {
+            start: fields.startTime,
+          },
+        },
+        [NOTION_TASKS_TAG_ENTIME]: {
+          date: {
+            start: fields.endTime,
+          },
+        },
+        [NOTION_TASKS_TAG_DONE]: {
+          checkbox: fields.done,
+        },
+      },
+    });
+    console.log(response);
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -251,7 +303,7 @@ const fetchTeamIds = async () => {
     });
     return response.results;
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
@@ -284,7 +336,7 @@ const fetchTasks = async (name) => {
     return result;
     // console.log(response.results[0].properties.Task);
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
@@ -318,8 +370,8 @@ module.exports.notionPreReminder = async () => {
     }
     return teamObj;
   } catch (error) {
-    console.error(error.body);
+    console.error(error);
   }
 };
 
-module.exports = { createCheckInTasks, fetchTasksUsers };
+module.exports = { createCheckInTasks, fetchTasksUsers, logTask };
