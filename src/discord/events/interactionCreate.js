@@ -47,14 +47,6 @@ module.exports = {
       } catch (error) {
         console.error(error.body);
       }
-    } else if (interaction.isAutocomplete()) {
-      const command = commands.get(commandName);
-      if (!command) return;
-      try {
-        await command.autocomplete(interaction);
-      } catch (error) {
-        console.error(error.body);
-      }
     }
   },
 };
