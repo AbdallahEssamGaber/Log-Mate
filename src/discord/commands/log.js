@@ -3,10 +3,12 @@ const { SlashCommandBuilder } = require("discord.js");
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
 const { fetchTasksUsers } = require("../../notion");
+const { log } = require("console");
 
 let tasks;
 (async () => {
   tasks = await fetchTasksUsers();
+  console.log(tasks);
 })();
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,9 +24,8 @@ module.exports = {
         .setRequired(true)
     ),
   async autocomplete(interaction) {
-    tasks = [...tasks[interaction.user.globalName], "NEW TASK"];
     const focusedValue = interaction.options.getFocused();
-    const choices = tasks;
+    const choices = [...tasks[interaction.user.globalName], "NEW TASK"];
     const filtered = choices.filter((choice) =>
       choice.startsWith(focusedValue)
     );

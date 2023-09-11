@@ -6,15 +6,6 @@ module.exports = {
     const { buttons, modals, selects, commands } = client;
     const { commandName } = interaction;
     if (interaction.isChatInputCommand()) {
-      const argAutocomplete = interaction.options.getString("task");
-      if (argAutocomplete) {
-        // try {
-        //   await
-        // } catch (error) {
-        //   console.error(error.body);
-        // }
-        // Handle args for autocomplete
-      }
       const command = commands.get(commandName);
       if (!command) return;
       try {

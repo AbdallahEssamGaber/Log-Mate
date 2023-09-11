@@ -16,6 +16,8 @@ const {
   NOTION_TASKS_TAG_STTIME,
   NOTION_TASKS_TAG_ENTIME,
   NOTION_TASKS_TAG_CHECKS,
+  NOTION_TASKS_TAG_DONE,
+  NOTION_TASKS_TAG_CREATEDTIME,
   NOTION_TAG_NAME,
 } = process.env;
 
@@ -200,19 +202,24 @@ const getMemberName = async (id) => {
 
 const fetchTasksUsers = async () => {
   try {
-    // const memberID = await isAvail(memberName);
-    // if (!memberID) {
-    //   console.log("sdf");
-    //   return null;
-    // }
     const response = await notion.databases.query({
       database_id: NOTION_TASKS_DB_ID,
-      // filter: {
-      //   property: NOTION_TASKS_TAG_MEMBER,
-      //   relation: {
-      //     contains: memberID,
-      //   },
-      // },
+      filter: {
+        and: [
+          {
+            property: NOTION_TASKS_TAG_CREATEDTIME,
+            date: {
+              equals: new Date().toISOString().split("T")[0],
+            },
+          },
+          {
+            property: NOTION_TASKS_TAG_DONE,
+            checkbox: {
+              equals: false,
+            },
+          },
+        ],
+      },
     });
     if (!response.results.length) {
       return null;
