@@ -11,7 +11,7 @@ const {
   newStringSelectMenuBuilder,
   newStringSelectMenuOptionBuilder,
 } = require("../utils/components/selectMenuBuilder.js");
-const { fetchTasksUsers, logTask } = require("../../notion");
+const { fetchTasksUsers, logTask, fetchCheckIn } = require("../../notion");
 require("../../functions/general/timeCalc.js");
 const { addMins, subMins } = require("../../functions/general/timeCalc.js");
 const parseTime = require("../../functions/general/parseTime.js");
@@ -56,10 +56,19 @@ module.exports = {
     );
   },
   async execute(interaction) {
+    const checkInValidation = await fetchCheckIn({
+      name: interaction.user.globalName,
+    });
     const chose = interaction.options.getString("task");
 
     if (chose === "NEW TASK") {
-      const modal = await newModal("addTask", "Add a task");
+      if (!checkInValidation) {
+        return interaction.reply({
+          content: "Please check in first.",
+          ephemeral: true,
+        });
+      }
+      const modal = await newModal("task", "Add a task");
 
       const taskName = await newInput({
         required: true,

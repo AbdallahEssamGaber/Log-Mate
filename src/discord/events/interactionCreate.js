@@ -11,7 +11,6 @@ module.exports = {
       try {
         await command.execute(interaction);
       } catch (error) {
-        console.log(command);
         console.error(error);
         await interaction.reply({
           content: "Something went wrong while executing command",
@@ -29,6 +28,7 @@ module.exports = {
       }
     } else if (interaction.type === InteractionType.ModalSubmit) {
       const modal = modals.get(interaction.customId);
+      console.log(interaction.customId);
       if (!modal) throw new Error("there is no code for this modal.");
       try {
         await modal.execute(interaction, client);

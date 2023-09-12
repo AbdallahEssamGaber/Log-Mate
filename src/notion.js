@@ -2,7 +2,6 @@ require("dotenv").config();
 const { Client } = require("@notionhq/client");
 
 var moment = require("moment"); // require
-const { fileURLToPath } = require("url");
 moment().format();
 const {
   NOTION_TOKEN,
@@ -11,6 +10,7 @@ const {
   NOTION_TASKS_DB_ID,
   NOTION_CHECKIN_TAG_MEMBER,
   NOTION_CHECKIN_TAG_BLOCKERS,
+  NOTION_CHECKIN_TAG_CREATEDTIME,
   NOTION_MEMBERS_TAG_USERID,
   NOTION_MEMBERS_TAG_USERNAME,
   NOTION_TASKS_TAG_MEMBER,
@@ -96,6 +96,38 @@ const isAvail = async (fields) => {
   }
 };
 
+const fetchCheckIn = async (fields) => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_CHECKIN_DB_ID,
+      filter: {
+        and: [
+          {
+            property: NOTION_TAG_NAME,
+            rich_text: {
+              contains: fields.name,
+            },
+          },
+          {
+            property: NOTION_CHECKIN_TAG_CREATEDTIME,
+            date: {
+              equals: new Date().toISOString().split("T")[0],
+            },
+          },
+        ],
+      },
+    });
+    if (!response.results.length) {
+      console.log("No checks for this user.");
+      return null;
+    }
+
+    return response.results[0].id;
+    // return response.id;
+  } catch (error) {
+    console.error(error);
+  }
+};
 const createCheckIn = async (memberID, checkName, fields) => {
   try {
     const response = await notion.pages.create({
@@ -295,6 +327,61 @@ const logTask = async (fields) => {
   }
 };
 
+const createNewTaskAndLog = async (fields) => {
+  try {
+    const memberID = await isAvail(fields);
+    const checkID = await fetchCheckIn(fields);
+    if (!checkID) return null;
+    const response = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: NOTION_TASKS_DB_ID,
+      },
+      properties: {
+        [NOTION_TAG_NAME]: {
+          title: [
+            {
+              text: {
+                content: fields.taskName,
+              },
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_MEMBER]: {
+          relation: [
+            {
+              id: memberID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_CHECKS]: {
+          relation: [
+            {
+              id: checkID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_STTIME]: {
+          date: {
+            start: fields.startTime,
+          },
+        },
+        [NOTION_TASKS_TAG_ENTIME]: {
+          date: {
+            start: fields.endTime,
+          },
+        },
+        [NOTION_TASKS_TAG_DONE]: {
+          checkbox: fields.done,
+        },
+      },
+    });
+    console.log(response);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // FETCH ALL THE IDS OF THE TEAM.
 const fetchTeamIds = async () => {
   try {
@@ -374,4 +461,10 @@ module.exports.notionPreReminder = async () => {
   }
 };
 
-module.exports = { createCheckInTasks, fetchTasksUsers, logTask };
+module.exports = {
+  createCheckInTasks,
+  fetchTasksUsers,
+  logTask,
+  fetchCheckIn,
+  createNewTaskAndLog,
+};

@@ -4,9 +4,10 @@ const {
   newStringSelectMenuBuilder,
   newStringSelectMenuOptionBuilder,
 } = require("../../components/selectMenuBuilder");
-const { createTask } = require("../../../../notion");
+const { createNewTaskAndLog } = require("../../../../notion");
 const { addMins, subMins } = require("../../../../functions/general/timeCalc");
-const parseTime = require("./../../../../functions/general/parseTime");
+const parseTime = require("../../../../functions/general/parseTime");
+
 module.exports = {
   data: {
     name: "task",
@@ -15,19 +16,25 @@ module.exports = {
     let taskName = interaction.fields.getTextInputValue("taskName");
     const startTimeSelectValues = [];
     const endTimeSelectValues = [];
-    for (let i = 1; i < 4; i++) {
-      const value = await newStringSelectMenuOptionBuilder({
-        label: subMins(i * 60),
-        value: subMins(i * 60),
-      });
-      startTimeSelectValues.push(value);
+    for (let i = 4; i > 0; i--) {
+      const values = subMins(i * 60);
+      for (const optionValue of values) {
+        const value = await newStringSelectMenuOptionBuilder({
+          label: optionValue,
+          value: optionValue,
+        });
+        startTimeSelectValues.push(value);
+      }
     }
     for (let i = 0; i >= -1; i--) {
-      const value = await newStringSelectMenuOptionBuilder({
-        label: addMins(i * 60),
-        value: addMins(i * 60),
-      });
-      endTimeSelectValues.push(value);
+      const values = addMins(i * 60);
+      for (const optionValue of values) {
+        const value = await newStringSelectMenuOptionBuilder({
+          label: optionValue,
+          value: optionValue,
+        });
+        endTimeSelectValues.push(value);
+      }
     }
     const startTimeSelect = (
       await newStringSelectMenuBuilder({
@@ -69,9 +76,10 @@ Chose It's Start and End Time For The Task Below, Please.`,
       taskName,
       startTime: "2020-12-08T12:00:00Z",
       endTime: "2020-12-08T12:00:00Z",
+      userId: user.id,
       username: user.username,
       name: user.globalName,
-      userId: user.id,
+      done: true,
     };
 
     const filter = (i) =>
@@ -100,9 +108,8 @@ Chose It's Start and End Time For The Task Below, Please.`,
       const customId = i.customId;
       const selection = i.values[0];
       taskTimes[customId] = selection;
-
       await i.reply({
-        content: `*you chose ${selection} from the ${interaction.customId} successfully!*`,
+        content: `*you chose ${selection} from the ${customId} successfully!*`,
         ephemeral: true,
       });
       setTimeout(() => i.deleteReply(), 1000);
@@ -120,8 +127,8 @@ Chose It's Start and End Time For The Task Below, Please.`,
     collectorButton.on("end", async () => {
       collectorSelect.stop();
       if (
-        taskTimes.hasOwnProperty("startTimeSelector") &&
-        taskTimes.hasOwnProperty("endTimeSelector") &&
+        taskTimes["startTimeSelector"] !== undefined &&
+        taskTimes["endTimeSelector"] !== undefined &&
         taskTimes.disabled !== true
       ) {
         let startTime = taskTimes.startTimeSelector;
@@ -134,19 +141,18 @@ You finished ${taskName} from ${taskTimes.startTimeSelector} until ${taskTimes.e
 
         startTime = parseTime(startTime);
         endTime = parseTime(endTime);
-        await createTask({ ...info, startTime, endTime });
+        await createNewTaskAndLog({ ...info, startTime, endTime });
       } else if (
-        !taskTimes.hasOwnProperty("startTimeSelector") &&
-        !taskTimes.hasOwnProperty("endTimeSelector") &&
+        (taskTimes["startTimeSelector"] === undefined ||
+          taskTimes["endTimeSelector"] === undefined) &&
         taskTimes.disabled !== true
       ) {
         await response.edit({
           content: "**Please select values!**",
           components: [],
         });
-      } else {
+      } else if (taskTimes.disabled !== true) {
         await response.delete();
-        await createTask(info);
       }
     });
   },
