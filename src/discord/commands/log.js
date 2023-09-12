@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   ActionRowBuilder,
   ComponentType,
+  disableValidators,
 } = require("discord.js");
 
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
@@ -208,10 +209,12 @@ You finished ${chose} from ${taskTimes.startTimeSelector} until ${taskTimes.endT
             content: "**Please select values!**",
             components: [],
           });
-        } else {
+        } else if (taskTimes.disabled !== true) {
           await response.delete();
         }
       });
     }
+
+    //TODO: if it's any thing else (not new task or not from choices) create this as a task
   },
 };
