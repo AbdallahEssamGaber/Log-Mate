@@ -1,28 +1,51 @@
-module.exports = (time) => {
-  time = time.toLowerCase();
-  let date = new Date();
-  let [hours, minutes] = time.slice(0, -2).split(":").map(Number);
-  if (time.includes("pm") && hours !== 12) hours += 12;
-  else if (time.includes("am") && hours === 12) hours -= 12;
+module.exports = (time12h) => {
+  time12h = time12h.toLowerCase();
+  const modifier = time12h.match(/[a-zA-Z]+/g);
+  const time = time12h.replace(modifier, "");
 
-  date.setHours(hours, minutes);
+  let [hours, minutes] = time.split(":");
 
-  function pad(num) {
-    return (num < 10 ? "0" : "") + num;
+  if (hours === "12") {
+    hours = "00";
   }
 
-  date =
-    date.getFullYear() +
-    "-" +
-    pad(date.getMonth() + 1) +
-    "-" +
-    pad(date.getDate()) +
-    "T" +
-    pad(date.getHours()) +
-    ":" +
-    pad(date.getMinutes()) +
-    ":" +
-    pad(date.getSeconds()) +
-    "Z";
-  return date;
+  if (modifier === "pm") {
+    hours = parseInt(hours, 10) + 12;
+  }
+  const date = new Date();
+  date.setHours(hours, minutes);
+  return date.toISOString();
+  // time = time.toLowerCase();
+  // let date = new Date();
+  // const [time, modifier] = time.split(" ");
+  // let [hours, minutes] = time.split(":");
+  // if (hours === "12") {
+  //   hours = "00";
+  // }
+  // if (modifier === "PM") {
+  //   hours = parseInt(hours, 10) + 12;
+  // }
+  // return `${hours}:${minutes}`;
+  // let date = new Date();
+  // let [hours, minutes] = time.slice(0, -2).split(":").map(Number);
+  // if (time.includes("pm") && hours !== 12) hours += 12;
+  // else if (time.includes("am") && hours === 12) hours -= 12;
+  // date.setHours(hours, minutes);
+  // function pad(num) {
+  //   return (num < 10 ? "0" : "") + num;
+  // }
+  // date =
+  //   date.getFullYear() +
+  //   "-" +
+  //   pad(date.getMonth() + 1) +
+  //   "-" +
+  //   pad(date.getDate()) +
+  //   "T" +
+  //   pad(date.getHours()) +
+  //   ":" +
+  //   pad(date.getMinutes()) +
+  //   ":" +
+  //   pad(date.getSeconds()) +
+  //   "Z";
+  // return date;
 };

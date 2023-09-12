@@ -18,7 +18,11 @@ module.exports = {
         });
       }
     } else if (interaction.isButton()) {
-      if (interaction.customId === "confirmTime") return;
+      if (
+        interaction.customId === "confirmTime" ||
+        interaction.customId === "confirmTimeChose"
+      )
+        return;
       const button = buttons.get(interaction.customId);
       if (!button) throw new Error("there is no code for this button.");
       try {
@@ -38,7 +42,9 @@ module.exports = {
     } else if (interaction.isStringSelectMenu()) {
       if (
         interaction.customId === "startTimeSelector" ||
-        interaction.customId === "endTimeSelector"
+        interaction.customId === "endTimeSelector" ||
+        interaction.customId === "startTimeSelectorChose" ||
+        interaction.customId === "endTimeSelectorChose"
       )
         return;
       const select = selects.get(interaction.customId);

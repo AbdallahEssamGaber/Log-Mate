@@ -16,6 +16,7 @@ require("../../functions/general/timeCalc.js");
 const { addMins, subMins } = require("../../functions/general/timeCalc.js");
 const parseTime = require("../../functions/general/parseTime.js");
 const { glob } = require("glob");
+const task = require("../utils/responses/modals/task.js");
 
 let tasks;
 (async () => {
@@ -109,20 +110,20 @@ module.exports = {
       }
       const startTimeSelect = (
         await newStringSelectMenuBuilder({
-          id: "startTimeSelector",
+          id: "startTimeSelectorChose",
           placeholder: "Task Start Time🌱",
         })
       ).addOptions(...startTimeSelectValues);
 
       const endTimeSelect = (
         await newStringSelectMenuBuilder({
-          id: "endTimeSelector",
+          id: "endTimeSelectorChose",
           placeholder: "Task End Time🌳",
         })
       ).addOptions(...endTimeSelectValues);
 
       const confirm = await newButton({
-        id: "confirmTime",
+        id: "confirmTimeChose",
         title: "Confirm",
         style: "success",
       });
@@ -153,17 +154,17 @@ Chose It's Start and End Time For The Task Below, Please.`,
 
       const filter = (i) =>
         i.user.id === interaction.user.id &&
-        (i.customId === "confirmTime" ||
+        (i.customId === "confirmTimeChose" ||
           i.customId === "addTime" ||
-          i.customId === "startTimeSelector" ||
-          i.customId === "endTimeSelector");
-      const collectorButton =
+          i.customId === "startTimeSelectorChose" ||
+          i.customId === "endTimeSelectorChose");
+      const collectorButtonChose =
         interaction.channel.createMessageComponentCollector({
           componentType: ComponentType.Button,
           filter,
           time: 100000,
         });
-      const collectorSelect =
+      const collectorSelectChose =
         interaction.channel.createMessageComponentCollector({
           componentType: ComponentType.StringSelect,
           filter,
@@ -171,7 +172,7 @@ Chose It's Start and End Time For The Task Below, Please.`,
       const taskTimes = {
         disabled: false,
       };
-      collectorSelect.on("collect", async (i) => {
+      collectorSelectChose.on("collect", async (i) => {
         const customId = i.customId;
         const selection = i.values[0];
         taskTimes[customId] = selection;
@@ -181,28 +182,29 @@ Chose It's Start and End Time For The Task Below, Please.`,
         });
         setTimeout(() => i.deleteReply(), 1000);
       });
-      collectorButton.on("collect", async (i) => {
+      collectorButtonChose.on("collect", async (i) => {
         if (i.customId === "addTime") {
           taskTimes.disabled = true;
+        } else if (i.customId === "confirmTimeChose") {
+          taskTimes.disabled = false;
 
-          collectorButton.stop();
-        } else if (i.customId === "confirmTime") {
-          await collectorButton.stop();
+          await collectorButtonChose.stop();
         }
       });
 
-      collectorButton.on("end", async () => {
-        collectorSelect.stop();
+      collectorButtonChose.on("end", async () => {
+        await collectorSelectChose.stop();
+
         if (
-          taskTimes["startTimeSelector"] !== undefined &&
-          taskTimes["endTimeSelector"] !== undefined &&
+          taskTimes["startTimeSelectorChose"] !== undefined &&
+          taskTimes["endTimeSelectorChose"] !== undefined &&
           taskTimes.disabled !== true
         ) {
-          let startTime = taskTimes.startTimeSelector;
-          let endTime = taskTimes.endTimeSelector;
+          let startTime = taskTimes.startTimeSelectorChose;
+          let endTime = taskTimes.endTimeSelectorChose;
           await response.edit({
             content: `Way to gooo👏👏
-You finished ${chose} from ${taskTimes.startTimeSelector} until ${taskTimes.endTimeSelector}`,
+You finished ${chose} from ${taskTimes.startTimeSelectorChose} until ${taskTimes.endTimeSelectorChose}`,
             components: [],
           });
 
@@ -210,8 +212,8 @@ You finished ${chose} from ${taskTimes.startTimeSelector} until ${taskTimes.endT
           endTime = parseTime(endTime);
           await logTask({ ...info, startTime, endTime });
         } else if (
-          (taskTimes["startTimeSelector"] === undefined ||
-            taskTimes["endTimeSelector"] === undefined) &&
+          (taskTimes["startTimeSelectorChose"] === undefined ||
+            taskTimes["endTimeSelectorChose"] === undefined) &&
           taskTimes.disabled !== true
         ) {
           await response.edit({

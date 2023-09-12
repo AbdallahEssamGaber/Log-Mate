@@ -13,6 +13,7 @@ module.exports = {
     name: "task",
   },
   async execute(interaction, client) {
+    console.log("new task");
     let taskName = interaction.fields.getTextInputValue("taskName");
     const startTimeSelectValues = [];
     const endTimeSelectValues = [];
@@ -117,15 +118,15 @@ Chose It's Start and End Time For The Task Below, Please.`,
     collectorButton.on("collect", async (i) => {
       if (i.customId === "addTime") {
         taskTimes.disabled = true;
-
-        collectorButton.stop();
       } else if (i.customId === "confirmTime") {
+        taskTimes.disabled = false;
+
         await collectorButton.stop();
       }
     });
 
     collectorButton.on("end", async () => {
-      collectorSelect.stop();
+      await collectorSelect.stop();
       if (
         taskTimes["startTimeSelector"] !== undefined &&
         taskTimes["endTimeSelector"] !== undefined &&

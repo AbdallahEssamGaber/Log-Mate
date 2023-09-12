@@ -3,6 +3,7 @@ module.exports = {
     name: "startTimeSelector",
   },
   async execute(interaction, client) {
+    console.log("ENTERED");
     await interaction.reply({
       content: `*you chose ${interaction.values[0]} from the ${interaction.customId} successfully!*`,
       ephemeral: true,
