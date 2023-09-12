@@ -398,9 +398,9 @@ const fetchTeamIds = async () => {
 const fetchTasks = async (name) => {
   try {
     const response = await notion.databases.query({
-      database_id: NOTION_MASTERTL_DB_ID,
+      database_id: NOTION_TASKS_DB_ID,
       filter: {
-        property: "Team Member",
+        property: [NOTION_TASKS_TAG_MEMBER],
         rollup: {
           any: {
             rich_text: {
@@ -411,7 +411,7 @@ const fetchTasks = async (name) => {
       },
       sorts: [
         {
-          property: "Created time",
+          property: [NOTION_TASKS_TAG_CREATEDTIME],
           direction: "descending",
         },
       ],
@@ -427,7 +427,7 @@ const fetchTasks = async (name) => {
   }
 };
 
-module.exports.notionPreReminder = async () => {
+const notionPreReminder = async () => {
   try {
     const teamObj = {};
     const teamIDs = await fetchTeamIds();
@@ -467,4 +467,5 @@ module.exports = {
   logTask,
   fetchCheckIn,
   createNewTaskAndLog,
+  notionPreReminder,
 };

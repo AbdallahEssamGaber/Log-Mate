@@ -10,7 +10,7 @@ class Bot {
 
   async initialize() {
     this.client = new Client({
-      intents: [GatewayIntentBits.Guilds],
+      intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
     });
 
     this.client.commands = new Collection();
