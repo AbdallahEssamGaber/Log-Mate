@@ -18,11 +18,7 @@ module.exports = {
         });
       }
     } else if (interaction.isButton()) {
-      if (
-        interaction.customId === "confirmTime" ||
-        interaction.customId === "confirmTimeChose"
-      )
-        return;
+      if (interaction.customId === "confirmTime") return;
       const button = buttons.get(interaction.customId);
       if (!button) throw new Error("there is no code for this button.");
       try {
@@ -32,7 +28,6 @@ module.exports = {
       }
     } else if (interaction.type === InteractionType.ModalSubmit) {
       const modal = modals.get(interaction.customId);
-      console.log(interaction.customId);
       if (!modal) throw new Error("there is no code for this modal.");
       try {
         await modal.execute(interaction, client);
@@ -42,9 +37,7 @@ module.exports = {
     } else if (interaction.isStringSelectMenu()) {
       if (
         interaction.customId === "startTimeSelector" ||
-        interaction.customId === "endTimeSelector" ||
-        interaction.customId === "startTimeSelectorChose" ||
-        interaction.customId === "endTimeSelectorChose"
+        interaction.customId === "endTimeSelector"
       )
         return;
       const select = selects.get(interaction.customId);

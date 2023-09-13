@@ -98,6 +98,8 @@ const isAvail = async (fields) => {
 
 const fetchCheckIn = async (fields) => {
   try {
+    const memberID = await isAvail(fields);
+    if (!memberID) return console.log("Couldn't create user.");
     const response = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
@@ -250,9 +252,6 @@ const fetchTasksUsers = async () => {
         },
       },
     });
-    if (!response.results.length) {
-      return null;
-    }
     let tasks = {};
     for (const result of response.results) {
       const memberName = await getMemberName(
@@ -295,7 +294,7 @@ const logTask = async (fields) => {
           {
             property: NOTION_TAG_NAME,
             rich_text: {
-              equals: fields.chose,
+              equals: fields.taskName,
             },
           },
         ],
@@ -421,7 +420,6 @@ const fetchTasks = async (name) => {
       : null;
 
     return result;
-    // console.log(response.results[0].properties.Task);
   } catch (error) {
     console.error(error);
   }
