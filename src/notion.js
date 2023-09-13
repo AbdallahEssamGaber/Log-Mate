@@ -244,10 +244,20 @@ const fetchTasksUsers = async () => {
     const response = await notion.databases.query({
       database_id: NOTION_TASKS_DB_ID,
       filter: {
-        property: NOTION_TASKS_TAG_DONE,
-        checkbox: {
-          does_not_equal: true,
-        },
+        and: [
+          {
+            property: NOTION_TASKS_TAG_DONE,
+            checkbox: {
+              does_not_equal: true,
+            },
+          },
+          {
+            property: NOTION_TASKS_TAG_CREATEDTIME,
+            date: {
+              equals: new Date().toISOString().split("T")[0],
+            },
+          },
+        ],
       },
     });
     if (!response.results.length) {
