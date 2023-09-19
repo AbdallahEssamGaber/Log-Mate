@@ -4,7 +4,7 @@
 //   newStringSelectMenuBuilder,
 //   newStringSelectMenuOptionBuilder,
 // } = require("../../components/selectMenuBuilder");
-// const { createNewTaskAndLog } = require("../../../../notion");
+const { addNewTask, checkInAvail } = require("../../../../notion");
 // const { addMins, subMins } = require("../../../../functions/general/timeCalc");
 // const parseTime = require("../../../../functions/general/parseTime");
 const logTaskCollector = require("../../collectors/logTask");
@@ -15,13 +15,20 @@ module.exports = {
   async execute(interaction) {
     const taskName = interaction.fields.getTextInputValue("taskName");
     const user = interaction.user;
-    logTaskCollector(interaction, {
+    const fields = {
       taskName,
       userId: user.id,
       username: user.username,
       name: user.globalName,
-      done: true,
-    });
+      done: false,
+    };
+    if (!checkInAvail(fields.userId)) {
+      await interaction.reply({ content: "You didn't check in today." });
+      return;
+    }
+    await logTaskCollector(interaction, fields);
+    await addNewTask(fields);
+    //TODO: ADD TASK WITH EMPTY STUFF BUT MAKE THIS ABOVE OBJ IN A VAR AND SEND IT TO NOTION TO CREATE WITH THOSE VALUES AND THEN ON SUBMIT MANUALLY MAKE IT CHECK WHERE IS THE ID OF THIS TASK PAGE WE ARE TALKING ABOUT AND THEN UPDATE ITS VALUES
 
     //     const startTimeSelectValues = [];
     //     const endTimeSelectValues = [];

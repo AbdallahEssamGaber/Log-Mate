@@ -7,9 +7,6 @@ module.exports = {
   async execute(interaction, client) {
     const todayWorks = interaction.fields.getTextInputValue("todayTask");
     const blockers = interaction.fields.getTextInputValue("blockers");
-    const msg = `best of luck with those: 
-*${interaction.fields.getTextInputValue("todayTask")}*`;
-
     const user = interaction.user;
 
     const info = {
@@ -20,8 +17,10 @@ module.exports = {
       name: user.globalName,
       userId: user.id,
     };
+
     await interaction.reply({
-      content: msg,
+      content: `best of luck with those: 
+*${interaction.fields.getTextInputValue("todayTask")}*`,
     });
 
     await createCheckInTasks(info);

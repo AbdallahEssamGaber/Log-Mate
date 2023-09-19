@@ -2,16 +2,19 @@ const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
 
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
-const { fetchTasksUsers, fetchCheckIn } = require("../../notion");
+const { fetchTasksUsers, fetchCheckIns } = require("../../notion");
 
 const logTaskCollector = require("../utils/collectors/logTask.js");
+const task = require("../utils/responses/modals/task.js");
 
 let tasks;
+let checkIns;
 (async () => {
   tasks = await fetchTasksUsers();
-
+  checkIns = await fetchCheckIns();
   setInterval(async () => {
     tasks = await fetchTasksUsers();
+    checkIns = await fetchCheckIns();
   }, 3000);
 })();
 
@@ -32,6 +35,7 @@ module.exports = {
     const focusedValue = interaction.options.getFocused();
     const { globalName } = interaction.user;
     let choices = [];
+    //TODO: wait if its not loaded first time but also take in considration it might be empty for no tasks
     if (tasks[globalName] !== undefined) {
       choices = [...tasks[interaction.user.globalName], "NEW TASK"];
     } else {
@@ -45,15 +49,11 @@ module.exports = {
     );
   },
   async execute(interaction) {
-    const checkInValidation = await fetchCheckIn({
-      name: interaction.user.globalName,
-      userId: interaction.user.id,
-      username: interaction.user.username,
-    });
+    const name = interaction.user.globalName;
     const chose = interaction.options.getString("task");
 
     if (chose === "NEW TASK") {
-      if (!checkInValidation) {
+      if (!checkIns.includes(name)) {
         return interaction.reply({
           content: "Please check in first.",
           ephemeral: true,
@@ -79,7 +79,7 @@ module.exports = {
       logTaskCollector(interaction, {
         taskName: chose,
         userId: interaction.user.id,
-        done: true,
+        done: false,
       });
     }
 

@@ -1,4 +1,4 @@
-const { updateTask } = require("../../../../notion");
+const { logHighlightedTask } = require("../../../../notion");
 const parseTime = require("./../../../../functions/general/parseTime");
 
 module.exports = {
@@ -36,7 +36,8 @@ module.exports = {
       username: user.username,
       name: user.globalName,
       userId: user.id,
+      done: true,
     };
-    await updateTask(info);
+    await logHighlightedTask(info);
   },
 };

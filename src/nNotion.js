@@ -19,6 +19,7 @@ const {
   NOTION_TASKS_TAG_CHECKS,
   NOTION_TASKS_TAG_DONE,
   NOTION_TASKS_TAG_CREATEDTIME,
+  NOTION_NAME_WORKERROLLUP,
   NOTION_TAG_NAME,
 } = process.env;
 
@@ -34,8 +35,10 @@ const fetchTasksUsers = async () => {
         and: [
           {
             property: NOTION_TASKS_TAG_DONE,
-            checkbox: {
-              does_not_equal: true,
+            formula: {
+              checkbox: {
+                does_not_equal: true,
+              },
             },
           },
           {
@@ -47,15 +50,16 @@ const fetchTasksUsers = async () => {
         ],
       },
     });
+    let tasks = {};
     if (!response.results.length) {
       console.log("there is no tasks at all.");
-      return null;
+      return tasks;
     }
-    let tasks = {};
     for (const result of response.results) {
-      const memberName =
-        result.properties[NOTION_TASKS_NAME_WORKERROLLUP].rollup.array[0]
-          .title[0].text.content;
+      const workerRollupArray =
+        result.properties[NOTION_NAME_WORKERROLLUP].rollup.array;
+      if (!workerRollupArray.length) continue;
+      const memberName = workerRollupArray[0].title[0].text.content;
       tasks[memberName] = !tasks[memberName]
         ? [result.properties.Name.title[0].plain_text]
         : (tasks[memberName] = [
@@ -64,6 +68,36 @@ const fetchTasksUsers = async () => {
           ]);
     }
     return tasks;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const fetchCheckIn = async () => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_CHECKIN_DB_ID,
+      filter: {
+        property: NOTION_CHECKIN_TAG_CREATEDTIME,
+        date: {
+          equals: new Date().toISOString().split("T")[0],
+        },
+      },
+    });
+    let checkInUsers = [];
+    if (!response.results.length) {
+      console.log("No checks for this user.");
+      return checkInUsers;
+    }
+    for (const result of response.results) {
+      const workerRollupArray =
+        result.properties[NOTION_NAME_WORKERROLLUP].rollup.array;
+      if (!workerRollupArray.length) continue;
+      checkInUsers.push(workerRollupArray[0].title[0].text.content);
+    }
+    console.log(checkInUsers);
+    return checkInUsers;
+    // return response.id;
   } catch (error) {
     console.error(error);
   }

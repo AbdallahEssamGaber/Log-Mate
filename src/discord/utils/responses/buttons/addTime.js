@@ -4,7 +4,6 @@ const {
   TextInputBuilder,
   TextInputStyle,
 } = require("discord.js");
-
 module.exports = {
   data: {
     name: "addTime",
