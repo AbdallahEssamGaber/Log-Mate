@@ -4,7 +4,11 @@ const {
   newStringSelectMenuBuilder,
   newStringSelectMenuOptionBuilder,
 } = require("../../utils/components/selectMenuBuilder.js");
-const { logTask, highlightTask } = require("../../../notion");
+const {
+  logTask,
+  highlightTask,
+  deleteHighlighting,
+} = require("../../../notion");
 require("../../../functions/general/timeCalc.js");
 const { addMins, subMins } = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
@@ -77,7 +81,7 @@ Chose It's Start and End Time For The Task Below, Please.`,
   const collectorButton = interaction.channel.createMessageComponentCollector({
     componentType: ComponentType.Button,
     filter,
-    time: 100000,
+    time: 50000,
   });
   const collectorSelect = interaction.channel.createMessageComponentCollector({
     componentType: ComponentType.StringSelect,
@@ -95,12 +99,13 @@ Chose It's Start and End Time For The Task Below, Please.`,
       ephemeral: true,
     });
     setTimeout(() => i.deleteReply(), 1000);
+    await deleteHighlighting();
   });
   collectorButton.on("collect", async (i) => {
     if (i.customId === "addTime") {
       taskTimes.disabled = true;
       await highlightTask(info);
-      // await createNewTaskWOLogging(info);
+      setTimeout(() => deleteHighlighting(), 100001);
     } else if (i.customId === "confirmTime") {
       taskTimes.disabled = false;
 
@@ -110,7 +115,7 @@ Chose It's Start and End Time For The Task Below, Please.`,
 
   collectorButton.on("end", async () => {
     await collectorSelect.stop();
-
+    await deleteHighlighting();
     if (
       taskTimes["startTimeSelector"] !== undefined &&
       taskTimes["endTimeSelector"] !== undefined &&
@@ -123,18 +128,11 @@ Chose It's Start and End Time For The Task Below, Please.`,
 You finished ${info.taskName} from ${taskTimes.startTimeSelector} until ${taskTimes.endTimeSelector}`,
         components: [],
       });
-      // await deleteOnLoggingTask(info);
       startTime = parseTime(startTime);
       endTime = parseTime(endTime);
       console.log(startTime, endTime);
       info = { ...info, startTime, endTime, done: true };
       await logTask(info);
-
-      // if (info["name"] === undefined) {
-      //   await logTask(info);
-      // } else {
-      //   await createNewTaskAndLog(info);
-      // }
     } else if (
       (taskTimes["startTimeSelector"] === undefined ||
         taskTimes["endTimeSelector"] === undefined) &&

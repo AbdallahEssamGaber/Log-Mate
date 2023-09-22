@@ -34,6 +34,7 @@ const newInput = async (prop) => {
   if (prop.placeholder) input.setPlaceholder(prop.placeholder);
   if (prop.minLength) input.setMinLength(prop.minLength);
   if (prop.maxLength) input.setMaxLength(prop.maxLength);
+  if (prop.value) input.setValue(prop.value);
   return input;
 };
 
