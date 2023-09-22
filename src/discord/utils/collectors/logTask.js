@@ -9,7 +9,6 @@ const {
   highlightTask,
   deleteHighlighting,
 } = require("../../../notion");
-require("../../../functions/general/timeCalc.js");
 const { addMins, subMins } = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
 
