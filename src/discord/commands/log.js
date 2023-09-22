@@ -39,7 +39,6 @@ module.exports = {
     const focusedValue = interaction.options.getFocused();
     const { globalName } = interaction.user;
     let choices = [];
-    //TODO: wait if its not loaded first time but also take in considration it might be empty for no tasks
     if (tasks[globalName] !== undefined) {
       choices = [...tasks[interaction.user.globalName], "NEW TASK"];
     } else {

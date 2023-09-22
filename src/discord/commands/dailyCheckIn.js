@@ -3,7 +3,7 @@ const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
 const { checkInAvail, deleteHighlighting, tags } = require("../../notion.js");
-//TODO: check check-ins all to avoid the lag of loading.
+//TODOincaseDelayHappened: check check-ins all to avoid the lag of loading.
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("check-in")

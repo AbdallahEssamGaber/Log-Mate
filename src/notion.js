@@ -8,14 +8,14 @@ const {
   NOTION_CHECKIN_DB_ID,
   NOTION_MEMBERS_DB_ID,
   NOTION_TASKS_DB_ID,
-  NOTION_DAYS_DB_I,
+  NOTION_DAYS_DB_ID,
   NOTION_WEEKS_DB_ID,
   NOTION_MONTHS_DB_ID,
   NOTION_CHECKIN_TAG_MEMBER,
   NOTION_CHECKIN_TAG_USERID,
   NOTION_CHECKIN_TAG_DAY,
   NOTION_CHECKIN_TAG_WEEK,
-  NOTION_CHECKIN_tag_MONTH,
+  NOTION_CHECKIN_TAG_MONTH,
   NOTION_CHECKIN_TAG_BLOCKERS,
   NOTION_CHECKIN_TAG_CREATEDTIME,
   NOTION_MEMBERS_TAG_USERID,
@@ -28,7 +28,7 @@ const {
   NOTION_TASKS_TAG_CREATEDTIME,
   NOTION_TASKS_TAG_DONE,
   NOTION_TASKS_TAG_DAY,
-  notion_tasks_tag_WEEK,
+  NOTION_TASKS_TAG_WEEK,
   NOTION_TASKS_TAG_MONTH,
   NOTION_NAME_WORKERROLLUP,
   NOTION_TAG_NAME,
@@ -37,7 +37,6 @@ const {
 const notion = new Client({
   auth: NOTION_TOKEN,
 });
-// const tags = "Slides\nTeacher Guide\nResearch\nLearning\nCourse\nDesign\nReview\nEdits\nPlanning"
 const tags = [
   "Slides",
   "Teacher Guide",
@@ -180,7 +179,14 @@ const fetchCheckIns = async (fields) => {
   }
 };
 
-const createCheckIn = async (memberID, checkName, fields) => {
+const createCheckIn = async (
+  memberID,
+  checkName,
+  fields,
+  dayPageID,
+  weekPageID,
+  monthPageID
+) => {
   try {
     const response = await notion.pages.create({
       parent: {
@@ -213,11 +219,27 @@ const createCheckIn = async (memberID, checkName, fields) => {
             },
           ],
         },
-        // [NOTION_CHECKIN_TAG_DAY]: {
-        //   relation: {
-        //     id:
-        //   }
-        // }
+        [NOTION_CHECKIN_TAG_DAY]: {
+          relation: [
+            {
+              id: dayPageID,
+            },
+          ],
+        },
+        [NOTION_CHECKIN_TAG_WEEK]: {
+          relation: [
+            {
+              id: weekPageID,
+            },
+          ],
+        },
+        [NOTION_CHECKIN_TAG_MONTH]: {
+          relation: [
+            {
+              id: monthPageID,
+            },
+          ],
+        },
       },
     });
     console.log(response);
@@ -227,7 +249,14 @@ const createCheckIn = async (memberID, checkName, fields) => {
   }
 };
 
-const createTask = async (memberID, checkID, taskName) => {
+const createTask = async (
+  memberID,
+  checkID,
+  taskName,
+  dayPageID,
+  weekPageID,
+  monthPageID
+) => {
   try {
     const response = await notion.pages.create({
       parent: {
@@ -255,6 +284,27 @@ const createTask = async (memberID, checkID, taskName) => {
           relation: [
             {
               id: checkID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_DAY]: {
+          relation: [
+            {
+              id: dayPageID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_WEEK]: {
+          relation: [
+            {
+              id: weekPageID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_MONTH]: {
+          relation: [
+            {
+              id: monthPageID,
             },
           ],
         },
@@ -300,10 +350,78 @@ const checkInAvail = async (userId) => {
   }
 };
 
-// const getDayId = async () => {};
-// const getWeekId = async () => {};
-// const getMonthId = async () => {};
+const getDayId = async () => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_DAYS_DB_ID,
+      filter: {
+        property: "Created time",
+        date: {
+          equals: new Date().toISOString().split("T")[0],
+        },
+      },
+    });
+    if (!response.results.length) return null;
+    return response.results[0].id;
+  } catch (error) {
+    console.error(error);
+  }
+};
+const getWeekId = async () => {
+  try {
+    let curr = new Date(); // get current date
+    let first = curr.getDate() - curr.getDay() - 1; // First day is the day of the month - the day of the week
+    let last = first + 7; // last day is the first day + 6
 
+    let lastday = new Date(curr.setDate(last));
+    const response = await notion.databases.query({
+      database_id: NOTION_WEEKS_DB_ID,
+      filter: {
+        property: "Created time",
+        date: {
+          on_or_before: lastday.toISOString().split("T")[0],
+        },
+      },
+    });
+    if (!response.results.length) return null;
+    return response.results[0].id;
+  } catch (error) {
+    console.error(error);
+  }
+};
+const getMonthId = async () => {
+  try {
+    const date = new Date(),
+      y = date.getFullYear(),
+      m = date.getMonth();
+    const firstDay = new Date(y, m, 1);
+    const lastDay = new Date(y, m + 1, 0);
+    const response = await notion.databases.query({
+      database_id: NOTION_MONTHS_DB_ID,
+      filter: {
+        and: [
+          {
+            property: "Created time",
+            date: {
+              before: lastDay.toISOString().split("T")[0],
+            },
+          },
+          {
+            property: "Created time",
+            date: {
+              after: firstDay.toISOString().split("T")[0],
+            },
+          },
+        ],
+      },
+    });
+
+    if (!response.results.length) return null;
+    return response.results[0].id;
+  } catch (error) {
+    console.error(error);
+  }
+};
 const createCheckInTasks = async (fields) => {
   try {
     //the id for the rollup db for the team member
@@ -313,13 +431,27 @@ const createCheckInTasks = async (fields) => {
       .replace(date.substring(6), date.slice(-2))
       .replace(/(^|\/)0+/g, "$1");
     const checkName = fields.name + " Check in " + date;
-    // const dayPageID = getDayId();
-    // const weekPageID = getWeekId();
-    // const monthPageID = getMonthId();
-    const checkID = await createCheckIn(memberID, checkName, fields);
+    const dayPageID = await getDayId();
+    const weekPageID = await getWeekId();
+    const monthPageID = await getMonthId();
+    const checkID = await createCheckIn(
+      memberID,
+      checkName,
+      fields,
+      dayPageID,
+      weekPageID,
+      monthPageID
+    );
     fields.todayWorks = fields.todayWorks.split("\n");
     for (let i = 0; i < fields.todayWorks.length; i++) {
-      await createTask(memberID, checkID, fields.todayWorks[i]);
+      await createTask(
+        memberID,
+        checkID,
+        fields.todayWorks[i],
+        dayPageID,
+        weekPageID,
+        monthPageID
+      );
     }
   } catch (error) {
     console.error(error);
@@ -507,8 +639,11 @@ const addNewTask = async (fields) => {
   try {
     const memberID = await isAvail(fields);
 
-    const checkID = await fetchCheckIn(memberID, fields);
-
+    const checkID = await fetchCheckIn(memberID);
+    const dayPageID = await getDayId();
+    const weekPageID = await getWeekId();
+    const monthPageID = await getMonthId();
+    console.log(dayPageID, weekPageID, monthPageID);
     const response = await notion.pages.create({
       parent: {
         type: "database_id",
@@ -543,6 +678,27 @@ const addNewTask = async (fields) => {
             name: fields.tag,
           },
         },
+        [NOTION_TASKS_TAG_DAY]: {
+          relation: [
+            {
+              id: dayPageID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_WEEK]: {
+          relation: [
+            {
+              id: weekPageID,
+            },
+          ],
+        },
+        [NOTION_TASKS_TAG_MONTH]: {
+          relation: [
+            {
+              id: monthPageID,
+            },
+          ],
+        },
       },
     });
     console.log(response);
@@ -550,7 +706,37 @@ const addNewTask = async (fields) => {
     console.error(error);
   }
 };
-
+// (async () => {
+//   try {
+//     const response = await notion.pages.create({
+//       parent: {
+//         type: "database_id",
+//         database_id: NOTION_TASKS_DB_ID,
+//       },
+//       properties: {
+//         [NOTION_TAG_NAME]: {
+//           title: [
+//             {
+//               text: {
+//                 content: "fields.taskName",
+//               },
+//             },
+//           ],
+//         },
+//         Months: {
+//           relation: [
+//             {
+//               id: "9d7333dc89794459b226ef83c8e94312",
+//             },
+//           ],
+//         },
+//       },
+//     });
+//     console.log(response);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// })();
 const highlightTask = async (fields) => {
   try {
     let taskId = await notion.databases.query({
