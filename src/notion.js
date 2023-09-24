@@ -3,6 +3,8 @@ const { Client } = require("@notionhq/client");
 
 var moment = require("moment"); // require
 moment().format();
+const cron = require("cron");
+
 const {
   NOTION_TOKEN,
   NOTION_CHECKIN_DB_ID,
@@ -422,6 +424,70 @@ const getMonthId = async () => {
     console.error(error);
   }
 };
+(async () => {
+  try {
+    new cron.CronJob("0 0 9 * * *", async () => {
+      const dayPageID = await getDayId();
+      const weekPageID = await getWeekId();
+      const monthPageID = await getMonthId();
+      const response = await notion.pages.update({
+        page_id: dayPageID,
+        properties: {
+          Weeks: {
+            relation: [
+              {
+                id: weekPageID,
+              },
+            ],
+          },
+          Months: {
+            relation: [
+              {
+                id: monthPageID,
+              },
+            ],
+          },
+        },
+      });
+      console.log(response);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
+(async () => {
+  try {
+    new cron.CronJob("0 0 8 * * 6", async () => {
+      const dayPageID = await getDayId();
+      const weekPageID = await getWeekId();
+      const monthPageID = await getMonthId();
+      const response = await notion.pages.update({
+        page_id: dayPageID,
+        properties: {
+          Weeks: {
+            relation: [
+              {
+                id: weekPageID,
+              },
+            ],
+          },
+          Months: {
+            relation: [
+              {
+                id: monthPageID,
+              },
+            ],
+          },
+        },
+      });
+      console.log(response);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
 const createCheckInTasks = async (fields) => {
   try {
     //the id for the rollup db for the team member
