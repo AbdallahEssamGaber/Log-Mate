@@ -88,6 +88,7 @@ Chose It's Start and End Time For The Task Below, Please.`,
   });
   const taskTimes = {
     disabled: false,
+    confirmButton: false,
   };
   collectorSelect.on("collect", async (i) => {
     const customId = i.customId;
@@ -104,10 +105,10 @@ Chose It's Start and End Time For The Task Below, Please.`,
     if (i.customId === "addTime") {
       taskTimes.disabled = true;
       await highlightTask(info);
-      setTimeout(() => deleteHighlighting(), 100001);
+      setTimeout(async () => await collectorButton.stop(), 60000);
     } else if (i.customId === "confirmTime") {
       taskTimes.disabled = false;
-
+      taskTimes.confirmButton = true;
       await collectorButton.stop();
     }
   });
@@ -115,10 +116,11 @@ Chose It's Start and End Time For The Task Below, Please.`,
   collectorButton.on("end", async () => {
     await collectorSelect.stop();
     await deleteHighlighting();
+
     if (
       taskTimes["startTimeSelector"] !== undefined &&
       taskTimes["endTimeSelector"] !== undefined &&
-      taskTimes.disabled !== true
+      taskTimes.confirmButton === true
     ) {
       let startTime = taskTimes.startTimeSelector;
       let endTime = taskTimes.endTimeSelector;
@@ -135,13 +137,13 @@ You finished ${info.taskName} from ${taskTimes.startTimeSelector} until ${taskTi
     } else if (
       (taskTimes["startTimeSelector"] === undefined ||
         taskTimes["endTimeSelector"] === undefined) &&
-      taskTimes.disabled !== true
+      taskTimes.confirmButton === true
     ) {
       await response.edit({
         content: "**Please select values!**",
         components: [],
       });
-    } else if (taskTimes.disabled !== true) {
+    } else {
       await response.delete();
     }
   });

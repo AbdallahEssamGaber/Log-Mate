@@ -643,7 +643,6 @@ const addNewTask = async (fields) => {
     const dayPageID = await getDayId();
     const weekPageID = await getWeekId();
     const monthPageID = await getMonthId();
-    console.log(dayPageID, weekPageID, monthPageID);
     const response = await notion.pages.create({
       parent: {
         type: "database_id",
@@ -673,11 +672,11 @@ const addNewTask = async (fields) => {
             },
           ],
         },
-        Tags: {
-          select: {
-            name: fields.tag,
-          },
-        },
+        // Tags: {
+        //   select: {
+        //     name: fields.tag,
+        //   },
+        // },
         [NOTION_TASKS_TAG_DAY]: {
           relation: [
             {
@@ -706,37 +705,6 @@ const addNewTask = async (fields) => {
     console.error(error);
   }
 };
-// (async () => {
-//   try {
-//     const response = await notion.pages.create({
-//       parent: {
-//         type: "database_id",
-//         database_id: NOTION_TASKS_DB_ID,
-//       },
-//       properties: {
-//         [NOTION_TAG_NAME]: {
-//           title: [
-//             {
-//               text: {
-//                 content: "fields.taskName",
-//               },
-//             },
-//           ],
-//         },
-//         Months: {
-//           relation: [
-//             {
-//               id: "9d7333dc89794459b226ef83c8e94312",
-//             },
-//           ],
-//         },
-//       },
-//     });
-//     console.log(response);
-//   } catch (error) {
-//     console.error(error);
-//   }
-// })();
 const highlightTask = async (fields) => {
   try {
     let taskId = await notion.databases.query({
