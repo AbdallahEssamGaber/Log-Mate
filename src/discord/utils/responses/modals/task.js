@@ -1,4 +1,4 @@
-const { addNewTask, checkInAvail } = require("../../../../notion");
+const { updateNewTask, checkInAvail } = require("../../../../notion");
 const logTaskCollector = require("../../collectors/logTask");
 module.exports = {
   data: {
@@ -12,13 +12,12 @@ module.exports = {
       userId: user.id,
       username: user.username,
       name: user.globalName,
-      done: false,
     };
     if (!checkInAvail(fields.userId)) {
       await interaction.reply({ content: "You didn't check in today." });
       return;
     }
     logTaskCollector(interaction, fields);
-    addNewTask(fields);
+    await updateNewTask(fields);
   },
 };

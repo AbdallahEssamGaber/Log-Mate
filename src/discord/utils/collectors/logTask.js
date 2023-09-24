@@ -8,11 +8,15 @@ const {
   logTask,
   highlightTask,
   deleteHighlighting,
+  addType,
 } = require("../../../notion");
 const { addMins, subMins } = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
 
 module.exports = async (interaction, info) => {
+  if (info["newTask"] !== undefined) {
+    addType(info);
+  }
   const startTimeSelectValues = [];
   const endTimeSelectValues = [];
   for (let i = 4; i > 0; i--) {
@@ -86,14 +90,13 @@ Chose It's Start and End Time For The Task Below, Please.`,
     componentType: ComponentType.StringSelect,
     filter,
   });
-  const taskTimes = {
-    disabled: false,
+  const taskLog = {
     confirmButton: false,
   };
   collectorSelect.on("collect", async (i) => {
     const customId = i.customId;
     const selection = i.values[0];
-    taskTimes[customId] = selection;
+    taskLog[customId] = selection;
     await i.reply({
       content: `*you chose ${selection} from the ${customId} successfully!*`,
       ephemeral: true,
@@ -103,12 +106,10 @@ Chose It's Start and End Time For The Task Below, Please.`,
   });
   collectorButton.on("collect", async (i) => {
     if (i.customId === "addTime") {
-      taskTimes.disabled = true;
       await highlightTask(info);
-      setTimeout(async () => await collectorButton.stop(), 60000);
+      setTimeout(async () => await collectorButton.stop(), 80000);
     } else if (i.customId === "confirmTime") {
-      taskTimes.disabled = false;
-      taskTimes.confirmButton = true;
+      taskLog.confirmButton = true;
       await collectorButton.stop();
     }
   });
@@ -118,26 +119,25 @@ Chose It's Start and End Time For The Task Below, Please.`,
     await deleteHighlighting();
 
     if (
-      taskTimes["startTimeSelector"] !== undefined &&
-      taskTimes["endTimeSelector"] !== undefined &&
-      taskTimes.confirmButton === true
+      taskLog["startTimeSelector"] !== undefined &&
+      taskLog["endTimeSelector"] !== undefined &&
+      taskLog.confirmButton === true
     ) {
-      let startTime = taskTimes.startTimeSelector;
-      let endTime = taskTimes.endTimeSelector;
+      let startTime = taskLog.startTimeSelector;
+      let endTime = taskLog.endTimeSelector;
       await response.edit({
         content: `Way to gooo👏👏
-You finished ${info.taskName} from ${taskTimes.startTimeSelector} until ${taskTimes.endTimeSelector}`,
+You finished ${info.taskName} from ${taskLog.startTimeSelector} until ${taskLog.endTimeSelector}`,
         components: [],
       });
       startTime = parseTime(startTime);
       endTime = parseTime(endTime);
-      console.log(startTime, endTime);
-      info = { ...info, startTime, endTime, done: true };
+      info = { ...info, startTime, endTime };
       await logTask(info);
     } else if (
-      (taskTimes["startTimeSelector"] === undefined ||
-        taskTimes["endTimeSelector"] === undefined) &&
-      taskTimes.confirmButton === true
+      (taskLog["startTimeSelector"] === undefined ||
+        taskLog["endTimeSelector"] === undefined) &&
+      taskLog.confirmButton === true
     ) {
       await response.edit({
         content: "**Please select values!**",

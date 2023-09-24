@@ -3,9 +3,11 @@ const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
 const {
+  tags,
   fetchTasksUsers,
   fetchCheckIns,
   deleteHighlighting,
+  newTaskEmpty,
 } = require("../../notion");
 
 const logTaskCollector = require("../utils/collectors/logTask.js");
@@ -34,18 +36,29 @@ module.exports = {
         )
         .setAutocomplete(true)
         .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("tag")
+        .setDescription("Choose the type of the task you want to add.")
+        .setAutocomplete(true)
+        .setRequired(true)
     ),
   async autocomplete(interaction) {
-    const focusedValue = interaction.options.getFocused();
-    const { globalName } = interaction.user;
-    let choices = [];
-    if (tasks[globalName] !== undefined) {
-      choices = [...tasks[interaction.user.globalName], "NEW TASK"];
-    } else {
-      choices = ["NEW TASK"];
+    const focusedOption = interaction.options.getFocused(true);
+    let choices;
+    if (focusedOption.name === "tag") choices = tags;
+    else if (focusedOption.name === "task") {
+      const { globalName } = interaction.user;
+      if (tasks[globalName] !== undefined) {
+        choices = [...tasks[interaction.user.globalName], "NEW TASK"];
+      } else {
+        choices = ["NEW TASK"];
+      }
     }
+
     const filtered = choices.filter((choice) =>
-      choice.startsWith(focusedValue)
+      choice.startsWith(focusedOption.value)
     );
     await interaction.respond(
       filtered.map((choice) => ({ name: choice, value: choice }))
@@ -53,16 +66,22 @@ module.exports = {
     deleteHighlighting();
   },
   async execute(interaction) {
-    const name = interaction.user.globalName;
+    const user = interaction.user;
     const chose = interaction.options.getString("task");
-
+    const taskTag = interaction.options.getString("tag");
+    const info = {
+      userId: user.id,
+      name: user.globalName,
+      username: user.username,
+    };
     if (chose === "NEW TASK") {
-      if (!checkIns.includes(name)) {
+      if (!checkIns.includes(info.name)) {
         return interaction.reply({
           content: "Please check in first.",
           ephemeral: true,
         });
       }
+      await newTaskEmpty({ ...info, taskTag });
       const modal = await newModal("task", "Add a task");
 
       const taskName = await newInput({
@@ -81,9 +100,10 @@ module.exports = {
       await interaction.showModal(modal);
     } else {
       logTaskCollector(interaction, {
+        ...info,
         taskName: chose,
-        userId: interaction.user.id,
-        done: false,
+        taskTag,
+        newTask: false,
       });
     }
 
