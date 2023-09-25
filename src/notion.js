@@ -94,6 +94,24 @@ const createMember = async (fields) => {
             },
           ],
         },
+        "Position Label": {
+          rich_text: [
+            {
+              text: {
+                content: "Position",
+              },
+            },
+          ],
+        },
+        "Team Label": {
+          rich_text: [
+            {
+              text: {
+                content: "Team",
+              },
+            },
+          ],
+        },
       },
     });
     return response.id;
