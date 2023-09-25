@@ -1,13 +1,7 @@
-const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
-const { newModal, newInput } = require("../utils/components/modalBuilder.js");
+const { addNewTask, fetchCheckIns } = require("../../notion");
 
-const { addNewTask, fetchCheckIns, tags } = require("../../notion");
-
-const logTaskCollector = require("../utils/collectors/logTask.js");
-const task = require("../utils/responses/modals/task.js");
-
-let tasks;
 let checkIns;
 (async () => {
   checkIns = await fetchCheckIns();

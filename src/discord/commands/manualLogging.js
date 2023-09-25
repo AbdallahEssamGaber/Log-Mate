@@ -1,12 +1,9 @@
-const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
-
-const { newModal, newInput } = require("../utils/components/modalBuilder.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 const {
   tags,
   fetchTasksUsers,
   fetchCheckIns,
-  deleteHighlighting,
   addType,
   logTask,
 } = require("../../notion");
@@ -75,7 +72,6 @@ module.exports = {
     await interaction.respond(
       filtered.map((choice) => ({ name: choice, value: choice }))
     );
-    deleteHighlighting();
   },
   async execute(interaction) {
     const user = interaction.user;
@@ -106,7 +102,6 @@ module.exports = {
       //check if it's 12-hours system with "pm" or "am" at the end.
       const re = new RegExp("^((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))$");
       if (!re.test(startTime) || !re.test(endTime)) {
-        deleteHighlighting();
         await interaction.reply({
           content:
             "**Please Type time in the 12 hour format with `AM` or `PM` at the end. `/manual-logging` again plz**",
@@ -119,7 +114,6 @@ module.exports = {
       startTime = parseTime(startTime);
       endTime = parseTime(endTime);
       if (endTime <= startTime) {
-        deleteHighlighting();
         await interaction.reply({
           content:
             "**Start time should be before End time. `/manual-logging` again plz**",

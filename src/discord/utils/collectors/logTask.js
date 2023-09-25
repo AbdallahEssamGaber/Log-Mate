@@ -4,7 +4,7 @@ const {
   newStringSelectMenuBuilder,
   newStringSelectMenuOptionBuilder,
 } = require("../../utils/components/selectMenuBuilder.js");
-const { logTask, highlightTask, addType } = require("../../../notion");
+const { logTask, addType } = require("../../../notion");
 const { addMins, subMins } = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
 

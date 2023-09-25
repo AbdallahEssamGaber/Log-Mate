@@ -2,7 +2,7 @@ const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
 
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
-const { checkInAvail, deleteHighlighting, tags } = require("../../notion.js");
+const { checkInAvail } = require("../../notion.js");
 //TODOincaseDelayHappened: check check-ins all to avoid the lag of loading.
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,7 +10,6 @@ module.exports = {
     .setDescription("Daily-Checking-In!"),
   async execute(interaction, client) {
     const userId = interaction.user.id;
-    await deleteHighlighting();
     const checkAvail = await checkInAvail(userId);
     if (checkAvail) {
       await interaction.reply({

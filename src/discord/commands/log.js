@@ -1,14 +1,6 @@
-const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
-const { newModal, newInput } = require("../utils/components/modalBuilder.js");
-
-const {
-  tags,
-  fetchTasksUsers,
-  fetchCheckIns,
-  deleteHighlighting,
-  newTaskEmpty,
-} = require("../../notion");
+const { tags, fetchTasksUsers, fetchCheckIns } = require("../../notion");
 
 const logTaskCollector = require("../utils/collectors/logTask.js");
 
@@ -62,7 +54,6 @@ module.exports = {
     await interaction.respond(
       filtered.map((choice) => ({ name: choice, value: choice }))
     );
-    deleteHighlighting();
   },
   async execute(interaction) {
     const user = interaction.user;
