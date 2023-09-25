@@ -63,7 +63,7 @@ const createMember = async (fields) => {
       icon: {
         type: "external",
         external: {
-          url: "https://www.notion.so/icons/user-circle-filled_blue.svg",
+          url: "https://www.notion.so/icons/user-circle_blue.svg",
         },
       },
       properties: {
