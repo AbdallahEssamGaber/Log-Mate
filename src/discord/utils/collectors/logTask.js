@@ -4,12 +4,7 @@ const {
   newStringSelectMenuBuilder,
   newStringSelectMenuOptionBuilder,
 } = require("../../utils/components/selectMenuBuilder.js");
-const {
-  logTask,
-  highlightTask,
-  deleteHighlighting,
-  addType,
-} = require("../../../notion");
+const { logTask, highlightTask, addType } = require("../../../notion");
 const { addMins, subMins } = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
 
@@ -102,12 +97,11 @@ Chose It's Start and End Time For The Task Below, Please.`,
       ephemeral: true,
     });
     setTimeout(() => i.deleteReply(), 1000);
-    await deleteHighlighting();
   });
   collectorButton.on("collect", async (i) => {
     if (i.customId === "addTime") {
       await highlightTask(info);
-      setTimeout(async () => await collectorButton.stop(), 80000);
+      collectorButton.stop();
     } else if (i.customId === "confirmTime") {
       taskLog.confirmButton = true;
       await collectorButton.stop();
@@ -116,8 +110,6 @@ Chose It's Start and End Time For The Task Below, Please.`,
 
   collectorButton.on("end", async () => {
     await collectorSelect.stop();
-    await deleteHighlighting();
-
     if (
       taskLog["startTimeSelector"] !== undefined &&
       taskLog["endTimeSelector"] !== undefined &&

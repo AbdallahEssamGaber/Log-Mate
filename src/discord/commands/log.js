@@ -81,7 +81,7 @@ module.exports = {
           ephemeral: true,
         });
       }
-      await newTaskEmpty({ ...info, taskTag });
+      newTaskEmpty({ ...info, taskTag });
       const modal = await newModal("task", "Add a task");
 
       const taskName = await newInput({

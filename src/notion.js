@@ -4,7 +4,6 @@ const { Client } = require("@notionhq/client");
 var moment = require("moment"); // require
 moment().format();
 const cron = require("cron");
-const task = require("./discord/utils/responses/modals/task");
 
 const {
   NOTION_TOKEN,
@@ -834,14 +833,6 @@ const highlightTask = async (fields) => {
             property: NOTION_TASKS_TAG_CREATEDTIME,
             date: {
               equals: new Date().toISOString().split("T")[0],
-            },
-          },
-          {
-            property: NOTION_TASKS_TAG_DONE,
-            formula: {
-              checkbox: {
-                does_not_equal: true,
-              },
             },
           },
         ],
