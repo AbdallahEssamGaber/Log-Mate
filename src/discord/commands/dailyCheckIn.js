@@ -25,7 +25,6 @@ module.exports = {
       id: "todayTask",
       label: "Planning to work on today?",
       placeholder: "What are you planning to work on today?",
-      value: "sdf",
       style: "paragraph",
     });
 

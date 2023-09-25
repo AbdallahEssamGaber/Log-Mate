@@ -4,37 +4,40 @@ const { Client } = require("@notionhq/client");
 var moment = require("moment"); // require
 moment().format();
 const cron = require("cron");
+const task = require("./discord/utils/responses/modals/task");
 
 const {
   NOTION_TOKEN,
   NOTION_CHECKIN_DB_ID,
-  NOTION_MEMBERS_DB_ID,
+  NOTION_WORKER_DB_ID,
   NOTION_TASKS_DB_ID,
   NOTION_DAYS_DB_ID,
   NOTION_WEEKS_DB_ID,
   NOTION_MONTHS_DB_ID,
-  NOTION_CHECKIN_TAG_MEMBER,
-  NOTION_CHECKIN_TAG_USERID,
-  NOTION_CHECKIN_TAG_DAY,
-  NOTION_CHECKIN_TAG_WEEK,
-  NOTION_CHECKIN_TAG_MONTH,
-  NOTION_CHECKIN_TAG_BLOCKERS,
-  NOTION_CHECKIN_TAG_CREATEDTIME,
-  NOTION_MEMBERS_TAG_USERID,
-  NOTION_MEMBERS_TAG_USERNAME,
-  NOTION_MEMBERS_TAG_CREATEDTIME,
-  NOTION_TASKS_TAG_MEMBER,
-  NOTION_TASKS_TAG_STTIME,
-  NOTION_TASKS_TAG_ENTIME,
-  NOTION_TASKS_TAG_CHECKS,
-  NOTION_TASKS_TAG_CREATEDTIME,
-  NOTION_TASKS_TAG_DONE,
-  NOTION_TASKS_TAG_DAY,
-  NOTION_TASKS_TAG_WEEK,
-  NOTION_TASKS_TAG_MONTH,
-  NOTION_NAME_WORKERROLLUP,
-  NOTION_TAG_NAME,
 } = process.env;
+
+const NOTION_CHECKIN_TAG_MEMBER = "Worker";
+const NOTION_CHECKIN_TAG_USERID = "Discord UserID";
+const NOTION_CHECKIN_TAG_DAY = "Day";
+const NOTION_CHECKIN_TAG_WEEK = "Week";
+const NOTION_CHECKIN_TAG_MONTH = "Month";
+const NOTION_CHECKIN_TAG_BLOCKERS = "blockers";
+const NOTION_CHECKIN_TAG_CREATEDTIME = "Created time";
+const NOTION_WORKER_TAG_USERID = "Discord UserId";
+const NOTION_WORKER_TAG_USERNAME = "Discord Username";
+const NOTION_WORKER_TAG_CREATEDTIME = "Created time";
+const NOTION_TASKS_TAG_MEMBER = "Workers";
+const NOTION_TASKS_TAG_STTIME = "Start Time";
+const NOTION_TASKS_TAG_ENTIME = "End Time";
+const NOTION_TASKS_TAG_CHECKS = "Checks";
+const NOTION_TASKS_TAG_CREATEDTIME = "Created time";
+const NOTION_TASKS_TAG_DONE = "Done?";
+const NOTION_TASKS_TAG_DAY = "Day";
+const NOTION_TASKS_TAG_WEEK = "Week";
+const NOTION_TASKS_TAG_MONTH = "Month";
+const NOTION_TASKS_TAG_USERID = "Discord userID";
+const NOTION_NAME_WORKERROLLUP = "Worker Name";
+const NOTION_TAG_NAME = "title";
 
 const notion = new Client({
   auth: NOTION_TOKEN,
@@ -51,12 +54,29 @@ const tags = [
   "Planning",
 ];
 
+// (async () => {
+//   try {
+//     const response = await notion.databases.query({
+//       database_id: NOTION_CHECKIN_DB_ID,
+//     });
+//     console.log(response.results[0].properties);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// })();
+
 const createMember = async (fields) => {
   try {
     const response = await notion.pages.create({
       parent: {
         type: "database_id",
-        database_id: NOTION_MEMBERS_DB_ID,
+        database_id: NOTION_WORKER_DB_ID,
+      },
+      icon: {
+        type: "external",
+        external: {
+          url: "https://www.notion.so/icons/user-circle-filled_blue.svg",
+        },
       },
       properties: {
         [NOTION_TAG_NAME]: {
@@ -68,7 +88,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        [NOTION_MEMBERS_TAG_USERNAME]: {
+        [NOTION_WORKER_TAG_USERNAME]: {
           rich_text: [
             {
               text: {
@@ -77,7 +97,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        [NOTION_MEMBERS_TAG_USERID]: {
+        [NOTION_WORKER_TAG_USERID]: {
           rich_text: [
             {
               text: {
@@ -97,9 +117,9 @@ const createMember = async (fields) => {
 const isAvail = async (fields) => {
   try {
     const response = await notion.databases.query({
-      database_id: NOTION_MEMBERS_DB_ID,
+      database_id: NOTION_WORKER_DB_ID,
       filter: {
-        property: NOTION_MEMBERS_TAG_USERID,
+        property: NOTION_WORKER_TAG_USERID,
         rich_text: {
           equals: fields.userId,
         },
@@ -155,12 +175,13 @@ const fetchCheckIn = async (memberID, fields) => {
 
 const fetchCheckIns = async (fields) => {
   try {
+    const todays = new Date().toISOString().split("T")[0];
     const response = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
-        property: NOTION_CHECKIN_TAG_CREATEDTIME,
+        property: "Created time",
         date: {
-          equals: new Date().toISOString().split("T")[0],
+          equals: todays,
         },
       },
     });
@@ -195,6 +216,12 @@ const createCheckIn = async (
         type: "database_id",
         database_id: NOTION_CHECKIN_DB_ID,
       },
+      icon: {
+        type: "external",
+        external: {
+          url: "https://www.notion.so/icons/arrivals_blue.svg",
+        },
+      },
       properties: {
         [NOTION_TAG_NAME]: {
           title: [
@@ -204,6 +231,11 @@ const createCheckIn = async (
               },
             },
           ],
+        },
+        [NOTION_CHECKIN_TAG_CREATEDTIME]: {
+          date: {
+            start: new Date().toISOString(),
+          },
         },
         [NOTION_CHECKIN_TAG_MEMBER]: {
           relation: [
@@ -264,6 +296,12 @@ const createTask = async (
       parent: {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
+      },
+      icon: {
+        type: "external",
+        external: {
+          url: "https://www.notion.so/icons/checklist_blue.svg",
+        },
       },
       properties: {
         [NOTION_TAG_NAME]: {
@@ -716,6 +754,12 @@ const addNewTask = async (fields) => {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
       },
+      icon: {
+        type: "external",
+        external: {
+          url: "https://www.notion.so/icons/checklist_blue.svg",
+        },
+      },
       properties: {
         [NOTION_TAG_NAME]: {
           title: [
@@ -945,6 +989,12 @@ const newTaskEmpty = async (fields) => {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
       },
+      icon: {
+        type: "external",
+        external: {
+          url: "https://www.notion.so/icons/checklist_blue.svg",
+        },
+      },
       properties: {
         [NOTION_TAG_NAME]: {
           title: [
@@ -1007,7 +1057,6 @@ const updateNewTask = async (fields) => {
       },
     });
     if (taskId.results.length === 0) {
-      console.log("sdf");
       return null;
     }
     const memberID = await isAvail(fields);
