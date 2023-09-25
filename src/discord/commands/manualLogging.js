@@ -7,10 +7,11 @@ const {
   fetchTasksUsers,
   fetchCheckIns,
   deleteHighlighting,
-  newTaskEmpty,
+  addType,
+  logTask,
 } = require("../../notion");
 
-const logTaskCollector = require("../utils/collectors/logTask.js");
+const parseTime = require("../../functions/general/parseTime.js");
 
 let tasks;
 let checkIns;
@@ -25,8 +26,8 @@ let checkIns;
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("log")
-    .setDescription("log a task")
+    .setName("manual-logging")
+    .setDescription("Manually time logging")
     .addStringOption((option) =>
       option
         .setName("task")
@@ -41,6 +42,18 @@ module.exports = {
         .setName("tag")
         .setDescription("Choose the type of the task you want to add.")
         .setAutocomplete(true)
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("start-time")
+        .setDescription("the start time of your log.")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("end-time")
+        .setDescription("the end time of your log.")
         .setRequired(true)
     ),
   async autocomplete(interaction) {
@@ -68,10 +81,14 @@ module.exports = {
     const user = interaction.user;
     const chose = interaction.options.getString("task");
     const taskTag = interaction.options.getString("tag");
-    const info = {
+    let startTime = interaction.options.getString("start-time");
+    let endTime = interaction.options.getString("end-time");
+    let info = {
+      taskName: chose,
       userId: user.id,
       name: user.globalName,
       username: user.username,
+      taskTag,
     };
     if (!checkIns.includes(info.name)) {
       return interaction.reply({
@@ -85,12 +102,40 @@ module.exports = {
         ephemeral: true,
       });
     } else if (tasks[info.name].includes(chose)) {
-      logTaskCollector(interaction, {
-        ...info,
-        taskName: chose,
-        taskTag,
-        newTask: false,
+      //check if the time inputted in right. and convert em before sending
+      //check if it's 12-hours system with "pm" or "am" at the end.
+      const re = new RegExp("^((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))$");
+      if (!re.test(startTime) || !re.test(endTime)) {
+        deleteHighlighting();
+        await interaction.reply({
+          content:
+            "**Please Type time in the 12 hour format with `AM` or `PM` at the end. `/manual-logging` again plz**",
+          ephemeral: true,
+        });
+
+        return;
+      }
+
+      startTime = parseTime(startTime);
+      endTime = parseTime(endTime);
+      if (endTime <= startTime) {
+        deleteHighlighting();
+        await interaction.reply({
+          content:
+            "**Start time should be before End time. `/manual-logging` again plz**",
+          ephemeral: true,
+        });
+
+        return;
+      }
+      await interaction.reply({
+        content: "Your submission was received successfully!",
+        ephemeral: true,
       });
+
+      info = { ...info, startTime, endTime };
+      await addType(info);
+      await logTask(info);
     }
 
     //TODO: if it's any thing else (not new task or not from choices) create this as a task

@@ -13,6 +13,6 @@ module.exports = (time12h) => {
     hours = parseInt(hours, 10) + 12;
   }
   const date = new Date();
-  date.setHours(hours - 1, minutes);
+  date.setHours(hours, minutes);
   return date.toISOString();
 };

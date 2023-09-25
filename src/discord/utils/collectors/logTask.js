@@ -53,27 +53,20 @@ module.exports = async (interaction, info) => {
     title: "Confirm",
     style: "success",
   });
-  const addButton = await newButton({
-    id: "addTime",
-    title: "Click Me to punch in a specific time",
-    style: "primary",
-  });
 
   const row = new ActionRowBuilder().addComponents(startTimeSelect);
   const row2 = new ActionRowBuilder().addComponents(endTimeSelect);
-  const row3 = new ActionRowBuilder().addComponents(addButton);
-  const row4 = new ActionRowBuilder().addComponents(confirm);
+  const row3 = new ActionRowBuilder().addComponents(confirm);
 
   const response = await interaction.reply({
     content: `\`\`\`Task: ${info.taskName}✅\`\`\`
 Chose It's Start and End Time For The Task Below, Please.`,
-    components: [row, row2, row3, row4],
+    components: [row, row2, row3],
   });
 
   const filter = (i) =>
     i.user.id === interaction.user.id &&
     (i.customId === "confirmTime" ||
-      i.customId === "addTime" ||
       i.customId === "startTimeSelector" ||
       i.customId === "endTimeSelector");
   const collectorButton = interaction.channel.createMessageComponentCollector({
@@ -99,10 +92,7 @@ Chose It's Start and End Time For The Task Below, Please.`,
     setTimeout(() => i.deleteReply(), 1000);
   });
   collectorButton.on("collect", async (i) => {
-    if (i.customId === "addTime") {
-      await highlightTask(info);
-      collectorButton.stop();
-    } else if (i.customId === "confirmTime") {
+    if (i.customId === "confirmTime") {
       taskLog.confirmButton = true;
       await collectorButton.stop();
     }
