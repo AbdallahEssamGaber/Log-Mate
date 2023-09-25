@@ -20,7 +20,7 @@ module.exports = {
       deleteHighlighting();
       await interaction.reply({
         content:
-          "**Please Type time in the 12 hour format with `AM` or `PM` at the end. `/task` again plz**",
+          "**Please Type time in the 12 hour format with `AM` or `PM` at the end. `/log` again plz**",
         ephemeral: true,
       });
 
@@ -32,7 +32,7 @@ module.exports = {
     if (endTime <= startTime) {
       deleteHighlighting();
       await interaction.reply({
-        content: "**Start time should be before End time. `/task` again plz**",
+        content: "**Start time should be before End time. `/log` again plz**",
         ephemeral: true,
       });
 

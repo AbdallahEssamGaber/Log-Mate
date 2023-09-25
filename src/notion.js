@@ -783,11 +783,6 @@ const addNewTask = async (fields) => {
             },
           ],
         },
-        Tags: {
-          select: {
-            name: fields.tag,
-          },
-        },
         [NOTION_TASKS_TAG_DAY]: {
           relation: [
             {

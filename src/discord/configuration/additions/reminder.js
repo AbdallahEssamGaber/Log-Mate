@@ -12,7 +12,7 @@ module.exports = async (client) => {
         res.forEach((member) => {
           if (member.user.id == key) {
             member.user.send(
-              `Please, type \`/task\` command to log task and time.`
+              `Please, type \`/log\` command to log task and time.`
             );
           }
         });
