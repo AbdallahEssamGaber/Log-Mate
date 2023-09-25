@@ -26,18 +26,6 @@ module.exports = {
         .setDescription("Type the task you want to add.")
         .setRequired(true)
     ),
-
-  async autocomplete(interaction) {
-    // const focusedValue = interaction.options.getFocused();
-    // const choices = tags;
-    // const filtered = choices.filter((choice) =>
-    //   choice.startsWith(focusedValue)
-    // );
-    // await interaction.respond(
-    //   filtered.map((choice) => ({ name: choice, value: choice }))
-    // );
-    // // deleteHighlighting();
-  },
   async execute(interaction) {
     const taskName = interaction.options.getString("task");
     const tag = interaction.options.getString("tag");

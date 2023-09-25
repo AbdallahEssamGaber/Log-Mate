@@ -11,7 +11,6 @@ const {
 } = require("../../notion");
 
 const logTaskCollector = require("../utils/collectors/logTask.js");
-const task = require("../utils/responses/modals/task.js");
 
 let tasks;
 let checkIns;
