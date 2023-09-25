@@ -88,7 +88,7 @@ module.exports = {
     };
     if (!checkIns.includes(info.name)) {
       return interaction.reply({
-        content: "Please check in first.",
+        content: "*Please check in first.*",
         ephemeral: true,
       });
     }
@@ -126,14 +126,16 @@ module.exports = {
       info = { ...info, startTime, endTime };
       if (tasks[info.name] !== undefined && tasks[info.name].includes(chose)) {
         await interaction.reply({
-          content: "Your submission was received successfully!",
+          content: `Way to gooo👏👏
+You finished ${info.taskName} from ${info.startTime} until ${info.endTime}`,
           ephemeral: true,
         });
 
         await logTask(info);
       } else {
         await interaction.reply({
-          content: "Created and logged!",
+          content: `Way to gooo👏👏
+You finished ${info.taskName} from ${info.startTime} until ${info.endTime}`,
           ephemeral: true,
         });
         await addLogTask(info);

@@ -13,7 +13,8 @@ module.exports = {
     const checkAvail = await checkInAvail(userId);
     if (checkAvail) {
       await interaction.reply({
-        content: "You've already checked-in.",
+        content: "*You've already checked-in.*",
+        ephemeral: true,
       });
       return;
     }

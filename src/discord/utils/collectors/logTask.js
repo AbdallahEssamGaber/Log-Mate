@@ -59,6 +59,7 @@ module.exports = async (interaction, info) => {
     content: `\`\`\`Task: ${info.taskName}✅\`\`\`
 Chose It's Start and End Time For The Task Below, Please.`,
     components: [row, row2, row3],
+    ephemeral: true,
   });
 
   const filter = (i) =>

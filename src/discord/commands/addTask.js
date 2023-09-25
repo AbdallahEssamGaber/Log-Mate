@@ -34,12 +34,13 @@ module.exports = {
     };
     if (!checkIns.includes(info.name)) {
       return interaction.reply({
-        content: "Please check in first.",
+        content: "*Please check in first.*",
         ephemeral: true,
       });
     }
     await interaction.reply({
       content: `*${taskName}* added to your task list.`,
+      ephemeral: true,
     });
     await addNewTask(info);
   },

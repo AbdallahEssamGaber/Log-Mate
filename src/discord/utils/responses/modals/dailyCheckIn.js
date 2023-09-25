@@ -21,6 +21,7 @@ module.exports = {
     await interaction.reply({
       content: `best of luck with those: 
 *${interaction.fields.getTextInputValue("todayTask")}*`,
+      ephemeral: true,
     });
 
     await createCheckInTasks(info);
