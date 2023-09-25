@@ -4,14 +4,11 @@ const {
   newStringSelectMenuBuilder,
   newStringSelectMenuOptionBuilder,
 } = require("../../utils/components/selectMenuBuilder.js");
-const { logTask, addType } = require("../../../notion");
+const { logTask } = require("../../../notion");
 const { addMins, subMins } = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
 
 module.exports = async (interaction, info) => {
-  if (info["newTask"] !== undefined) {
-    addType(info);
-  }
   const startTimeSelectValues = [];
   const endTimeSelectValues = [];
   for (let i = 4; i > 0; i--) {

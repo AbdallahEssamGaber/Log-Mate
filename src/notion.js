@@ -646,6 +646,11 @@ const logTask = async (fields) => {
     const response = await notion.pages.update({
       page_id: responseID.results[0].id,
       properties: {
+        Tags: {
+          select: {
+            name: fields.taskTag,
+          },
+        },
         [NOTION_TASKS_TAG_STTIME]: {
           date: {
             start: fields.startTime,
@@ -801,44 +806,25 @@ const addNewTask = async (fields) => {
   }
 };
 
-const updateNewTask = async (fields) => {
+const addLogTask = async (fields) => {
   try {
-    let taskId = await notion.databases.query({
-      database_id: NOTION_TASKS_DB_ID,
-      filter: {
-        and: [
-          {
-            property: NOTION_TAG_NAME,
-            rich_text: {
-              equals: "NEW TASK",
-            },
-          },
-          {
-            property: NOTION_TASKS_TAG_CREATEDTIME,
-            date: {
-              equals: new Date().toISOString().split("T")[0],
-            },
-          },
-          {
-            property: "Discord userID",
-            rollup: {
-              any: {
-                rich_text: {
-                  contains: fields.userId,
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
-    if (taskId.results.length === 0) {
-      return null;
-    }
     const memberID = await isAvail(fields);
+
     const checkID = await fetchCheckIn(memberID);
-    const response = await notion.pages.update({
-      page_id: taskId.results[0].id,
+    const dayPageID = await getDayId();
+    const weekPageID = await getWeekId();
+    const monthPageID = await getMonthId();
+    const response = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: NOTION_TASKS_DB_ID,
+      },
+      icon: {
+        type: "external",
+        external: {
+          url: "https://www.notion.so/icons/checklist_blue.svg",
+        },
+      },
       properties: {
         [NOTION_TAG_NAME]: {
           title: [
@@ -848,6 +834,11 @@ const updateNewTask = async (fields) => {
               },
             },
           ],
+        },
+        Tags: {
+          select: {
+            name: fields.taskTag,
+          },
         },
         [NOTION_TASKS_TAG_MEMBER]: {
           relation: [
@@ -863,50 +854,35 @@ const updateNewTask = async (fields) => {
             },
           ],
         },
-      },
-    });
-    console.log(response);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const addType = async (fields) => {
-  try {
-    let taskId = await notion.databases.query({
-      database_id: NOTION_TASKS_DB_ID,
-      filter: {
-        and: [
-          {
-            property: NOTION_TAG_NAME,
-            rich_text: {
-              equals: fields.taskName,
+        [NOTION_TASKS_TAG_DAY]: {
+          relation: [
+            {
+              id: dayPageID,
             },
-          },
-          {
-            property: NOTION_TASKS_TAG_CREATEDTIME,
-            date: {
-              equals: new Date().toISOString().split("T")[0],
+          ],
+        },
+        [NOTION_TASKS_TAG_WEEK]: {
+          relation: [
+            {
+              id: weekPageID,
             },
-          },
-          {
-            property: NOTION_TASKS_TAG_DONE,
-            formula: {
-              checkbox: {
-                does_not_equal: true,
-              },
+          ],
+        },
+        [NOTION_TASKS_TAG_MONTH]: {
+          relation: [
+            {
+              id: monthPageID,
             },
+          ],
+        },
+        [NOTION_TASKS_TAG_STTIME]: {
+          date: {
+            start: fields.startTime,
           },
-        ],
-      },
-    });
-    if (taskId.results.length === 0) return null;
-    const response = await notion.pages.update({
-      page_id: taskId.results[0].id,
-      properties: {
-        Tags: {
-          select: {
-            name: fields.taskTag,
+        },
+        [NOTION_TASKS_TAG_ENTIME]: {
+          date: {
+            start: fields.endTime,
           },
         },
       },
@@ -925,7 +901,6 @@ module.exports = {
   logTask,
   fetchCheckIns,
   addNewTask,
-  updateNewTask,
-  addType,
+  addLogTask,
   notionPreReminder,
 };

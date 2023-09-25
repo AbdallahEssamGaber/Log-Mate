@@ -1,6 +1,11 @@
 const { SlashCommandBuilder } = require("discord.js");
 
-const { tags, fetchTasksUsers, fetchCheckIns } = require("../../notion");
+const {
+  tags,
+  fetchTasksUsers,
+  fetchCheckIns,
+  addNewTask,
+} = require("../../notion");
 
 const logTaskCollector = require("../utils/collectors/logTask.js");
 
@@ -44,7 +49,7 @@ module.exports = {
       if (tasks[globalName] !== undefined) {
         choices = tasks[globalName];
       } else {
-        choices = ["ADD A TASK FIRST."];
+        choices = ["TYPE THE TASK YOU WANT TO ADD AND LOG."];
       }
     }
 
@@ -63,6 +68,8 @@ module.exports = {
       userId: user.id,
       name: user.globalName,
       username: user.username,
+      taskTag,
+      taskName: chose,
     };
     if (!checkIns.includes(info.name)) {
       return interaction.reply({
@@ -70,20 +77,20 @@ module.exports = {
         ephemeral: true,
       });
     }
-    if (chose === "ADD A TASK FIRST.") {
+    if (info.taskName === "TYPE THE TASK YOU WANT TO ADD AND LOG.") {
       return interaction.reply({
-        content: "ADD A TASK FIRST.",
+        content:
+          "YOU SHOULD'VE TYPED MANUALLY THE TASK YOU WANT TO ADD AND LOG.",
         ephemeral: true,
       });
-    } else if (tasks[info.name].includes(chose)) {
-      logTaskCollector(interaction, {
-        ...info,
-        taskName: chose,
-        taskTag,
-        newTask: false,
-      });
+    } else {
+      logTaskCollector(interaction, info);
+      if (
+        tasks[info.name] === undefined ||
+        !tasks[info.name].includes(info.taskName)
+      ) {
+        await addNewTask(info);
+      }
     }
-
-    //TODO: if it's any thing else (not new task or not from choices) create this as a task
   },
 };

@@ -4,8 +4,8 @@ const {
   tags,
   fetchTasksUsers,
   fetchCheckIns,
-  addType,
   logTask,
+  addLogTask,
 } = require("../../notion");
 
 const parseTime = require("../../functions/general/parseTime.js");
@@ -62,7 +62,7 @@ module.exports = {
       if (tasks[globalName] !== undefined) {
         choices = tasks[globalName];
       } else {
-        choices = ["ADD A TASK FIRST."];
+        choices = ["TYPE THE TASK YOU WANT TO ADD AND LOG."];
       }
     }
 
@@ -92,12 +92,13 @@ module.exports = {
         ephemeral: true,
       });
     }
-    if (chose === "ADD A TASK FIRST.") {
+    if (chose === "TYPE THE TASK YOU WANT TO ADD AND LOG.") {
       return interaction.reply({
-        content: "ADD A TASK FIRST.",
+        content:
+          "YOU SHOULD'VE TYPED MANUALLY THE TASK YOU WANT TO ADD AND LOG.",
         ephemeral: true,
       });
-    } else if (tasks[info.name].includes(chose)) {
+    } else {
       //check if the time inputted in right. and convert em before sending
       //check if it's 12-hours system with "pm" or "am" at the end.
       const re = new RegExp("^((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))$");
@@ -122,16 +123,21 @@ module.exports = {
 
         return;
       }
-      await interaction.reply({
-        content: "Your submission was received successfully!",
-        ephemeral: true,
-      });
-
       info = { ...info, startTime, endTime };
-      await addType(info);
-      await logTask(info);
-    }
+      if (tasks[info.name] !== undefined && tasks[info.name].includes(chose)) {
+        await interaction.reply({
+          content: "Your submission was received successfully!",
+          ephemeral: true,
+        });
 
-    //TODO: if it's any thing else (not new task or not from choices) create this as a task
+        await logTask(info);
+      } else {
+        await interaction.reply({
+          content: "Created and logged!",
+          ephemeral: true,
+        });
+        await addLogTask(info);
+      }
+    }
   },
 };
