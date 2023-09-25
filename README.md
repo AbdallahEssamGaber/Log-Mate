@@ -1,12 +1,12 @@
-# Daily-Check-In _-v0.2_
+# Log-Mate bot _-v3.0_
 
 <p align="center">
 <img src="https://i.imgur.com/sSqTu56.png" height="200px">
   
-<h3 align="center"> A discord bot consuming Notion API to add a check-in/out data for Notion databases. </h3>
+<h3 align="center"> A discord bot consuming Notion API to add a check-in, Tasks/Time logging and Reminders data for Notion databases. </h3>
 </p>
 
-Check-In/out for workers over Discord using NodeJS Express NotionAPI and DiscordAPI
+Check-In, Logging and Reminders for workers over Discord using NodeJS Express NotionAPI and DiscordAPI
 
 <br>
 <br>
@@ -51,8 +51,8 @@ Check that [simple guide](https://discordjs.guide/preparations/setting-up-a-bot-
 
 ## Install
 
-    $ git clone https://github.com/AbdallahEssamGaber/daily-check-in
-    $ cd daily-check-in
+    $ git clone https://github.com/AbdallahEssamGaber/Log-Mate
+    $ cd Log-Mate
     $ npm install
 
 <br>
@@ -74,16 +74,18 @@ in the root directory create a `.env` file.
 
 Open `.env` then edit it with your settings. You will need:
 
-> BOT_TOKEN, CLIENT_ID, GUILD_ID, NOTION_TOKEN, NOTION_CHECKIN_DB_ID, NOTION_MEMBERS_DB_ID, NOTION_CHECKOUT_DB_ID, NOTION_DESCRIPTIONS_DB_ID
+> BOT_TOKEN, CLIENT_ID, GUILD_ID, NOTION_TOKEN, NOTION_CHECKIN_DB_ID, NOTION_WORKER_DB_ID, NOTION_TASKS_DB_ID, NOTION_DAYS_DB_ID, NOTION_WEEKS_DB_ID, NOTION_MONTHS_DB_ID
 
     BOT_TOKEN=<Discord bot token :string>
     CLIENT_ID=<Discord client id :string>
     GUILD_ID=<Discord Guild(server) id :string>
     NOTION_TOKEN=<Notion Integration token :string>
     NOTION_CHECKIN_DB_ID=<Notion Check-in database token :string>
-    NOTION_MEMBERS_DB_ID=<Notion company workers database token :string>
-    NOTION_CHECKOUT_DB_ID=<Notion Check-out database token :string>
-    NOTION_DESCRIPTIONS_DB_ID=<Notion All Descriptions database token :string>
+    NOTION_WORKER_DB_ID=<Notion company workers database token :string>
+    NOTION_TASKS_DB_ID=<Notion Tasks database token :string>
+    NOTION_DAYS_DB_ID=<Notion Days database token :string>
+    NOTION_WEEKS_DB_ID=<Notion Weeks database token :string>
+    NOTION_MONTHS_DB_ID=<Notion Months database token :string>
 
 <br>
 <br>
@@ -94,17 +96,3 @@ Open `.env` then edit it with your settings. You will need:
 
 <br>
 <br>
-
-## Folder Structure
-
-`index.js` &#8594; The base file.
-
-`src/notoin.js` &#8594; Notion Auth file and creating a page code.
-
-`src/general_modules` &#8594; Local created modules to help me along the way.
-
-`src/discord/commands` &#8594; All the commands info to use
-
-`src/discord/events` &#8594; All the events listener to handle the commands
-
-`src/discord/configuration` &#8594; The kick-start to everything (initialize, login and deploy)
