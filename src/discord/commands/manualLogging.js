@@ -44,13 +44,17 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("start-time")
-        .setDescription("the start time of your log.")
+        .setDescription(
+          "the start time of your log. Please Type time in the 12 hour format with `AM` or `PM` at the end."
+        )
         .setRequired(true)
     )
     .addStringOption((option) =>
       option
         .setName("end-time")
-        .setDescription("the end time of your log.")
+        .setDescription(
+          "the end time of your log. Please Type time in the 12 hour format with `AM` or `PM` at the end."
+        )
         .setRequired(true)
     ),
   async autocomplete(interaction) {
