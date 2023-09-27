@@ -13,11 +13,15 @@ const parseTime = require("../../functions/general/parseTime.js");
 let tasks;
 let checkIns;
 (async () => {
-  tasks = await fetchTasksUsers();
-  checkIns = await fetchCheckIns();
+  const tasksFetched = await fetchTasksUsers();
+  tasks = tasksFetched;
+  const checksFetched = await fetchCheckIns();
+  checkIns = checksFetched;
   setInterval(async () => {
-    tasks = await fetchTasksUsers();
-    checkIns = await fetchCheckIns();
+    const tasksFetched = await fetchTasksUsers();
+    tasks = tasksFetched;
+    const checksFetched = await fetchCheckIns();
+    checkIns = checksFetched;
   }, 3000);
 })();
 
@@ -63,7 +67,7 @@ module.exports = {
     if (focusedOption.name === "tag") choices = tags;
     else if (focusedOption.name === "task") {
       const { globalName } = interaction.user;
-      if (tasks[globalName] !== undefined) {
+      if (tasks && tasks[globalName] !== undefined) {
         choices = tasks[globalName];
       } else {
         choices = ["TYPE THE TASK YOU WANT TO ADD AND LOG."];
@@ -81,8 +85,14 @@ module.exports = {
     const user = interaction.user;
     const chose = interaction.options.getString("task");
     const taskTag = interaction.options.getString("tag");
-    let startTime = interaction.options.getString("start-time");
-    let endTime = interaction.options.getString("end-time");
+    const startTime = interaction.options.getString("start-time");
+    const endTime = interaction.options.getString("end-time");
+    if (!tags.includes(taskTag)) {
+      return interaction.reply({
+        content: "*Please chose a valid type.*",
+        ephemeral: true,
+      });
+    }
     let info = {
       taskName: chose,
       userId: user.id,
@@ -116,9 +126,9 @@ module.exports = {
         return;
       }
 
-      startTime = parseTime(startTime);
-      endTime = parseTime(endTime);
-      if (endTime <= startTime) {
+      const startTimeParsed = parseTime(startTime);
+      const endTimeParsed = parseTime(endTime);
+      if (endTimeParsed <= startTimeParsed) {
         await interaction.reply({
           content:
             "**Start time should be before End time. `/manual-logging` again plz**",
@@ -127,19 +137,18 @@ module.exports = {
 
         return;
       }
-      info = { ...info, startTime, endTime };
+      info = { ...info, startTime: startTimeParsed, endTime: endTimeParsed };
       if (tasks[info.name] !== undefined && tasks[info.name].includes(chose)) {
         await interaction.reply({
           content: `Way to gooo👏👏
-You finished ${info.taskName} from ${info.startTime} until ${info.endTime}`,
+You finished ${info.taskName} from ${startTime} until ${endTime}`,
           ephemeral: true,
         });
-
         await logTask(info);
       } else {
         await interaction.reply({
           content: `Way to gooo👏👏
-You finished ${info.taskName} from ${info.startTime} until ${info.endTime}`,
+You finished ${info.taskName} from ${startTime} until ${endTime}`,
           ephemeral: true,
         });
         await addLogTask(info);
