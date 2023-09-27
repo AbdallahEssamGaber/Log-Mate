@@ -12,11 +12,15 @@ const logTaskCollector = require("../utils/collectors/logTask.js");
 let tasks;
 let checkIns;
 (async () => {
-  tasks = await fetchTasksUsers();
-  checkIns = await fetchCheckIns();
+  const tasksFetched = await fetchTasksUsers();
+  tasks = tasksFetched;
+  const checksFetched = await fetchCheckIns();
+  checkIns = checksFetched;
   setInterval(async () => {
-    tasks = await fetchTasksUsers();
-    checkIns = await fetchCheckIns();
+    const tasksFetched = await fetchTasksUsers();
+    tasks = tasksFetched;
+    const checksFetched = await fetchCheckIns();
+    checkIns = checksFetched;
   }, 3000);
 })();
 
@@ -46,7 +50,8 @@ module.exports = {
     if (focusedOption.name === "tag") choices = tags;
     else if (focusedOption.name === "task") {
       const { globalName } = interaction.user;
-      if (tasks[globalName] !== undefined) {
+      console.log(tasks);
+      if (tasks && tasks[globalName] !== undefined) {
         choices = tasks[globalName];
       } else {
         choices = ["TYPE THE TASK YOU WANT TO ADD AND LOG."];
@@ -64,6 +69,12 @@ module.exports = {
     const user = interaction.user;
     const chose = interaction.options.getString("task");
     const taskTag = interaction.options.getString("tag");
+    if (!tags.includes(taskTag)) {
+      return interaction.reply({
+        content: "*Please chose a valid type.*",
+        ephemeral: true,
+      });
+    }
     const info = {
       userId: user.id,
       name: user.globalName,

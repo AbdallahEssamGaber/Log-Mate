@@ -4,9 +4,11 @@ const { addNewTask, fetchCheckIns } = require("../../notion");
 
 let checkIns;
 (async () => {
-  checkIns = await fetchCheckIns();
+  const checksFetched = await fetchCheckIns();
+  checkIns = checksFetched;
   setInterval(async () => {
-    checkIns = await fetchCheckIns();
+    const checksFetched = await fetchCheckIns();
+    checkIns = checksFetched;
   }, 3000);
 })();
 

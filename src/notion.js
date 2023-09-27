@@ -535,15 +535,27 @@ const getMonthId = async () => {
 const createCheckInTasks = async (fields) => {
   try {
     //the id for the rollup db for the team member
-    const memberID = await isAvail(fields);
+    let memberID = await isAvail(fields);
+    if (memberID === undefined) {
+      memberID = await isAvail(fields);
+    }
     let date = new Date().toLocaleDateString("en-GB");
     date = date
       .replace(date.substring(6), date.slice(-2))
       .replace(/(^|\/)0+/g, "$1");
     const checkName = fields.name + " Check in " + date;
-    const dayPageID = await getDayId();
-    const weekPageID = await getWeekId();
-    const monthPageID = await getMonthId();
+    let dayPageID = await getDayId();
+    if (dayPageID === undefined) {
+      dayPageID = await getDayId();
+    }
+    let weekPageID = await getWeekId();
+    if (weekPageID === undefined) {
+      weekPageID = await getWeekId();
+    }
+    let monthPageID = await getMonthId();
+    if (monthPageID === undefined) {
+      monthPageID = await monthPageID();
+    }
     const checkID = await createCheckIn(
       memberID,
       checkName,
@@ -754,13 +766,27 @@ const notionPreReminder = async () => {
 
 const addNewTask = async (fields) => {
   try {
-    const memberID = await isAvail(fields);
-
-    const checkID = await fetchCheckIn(memberID);
-    const dayPageID = await getDayId();
-    const weekPageID = await getWeekId();
-    const monthPageID = await getMonthId();
-    const response = await notion.pages.create({
+    let memberIDForNewTask = await isAvail(fields);
+    if (memberIDForNewTask === undefined) {
+      memberIDForNewTask = await isAvail(fields);
+    }
+    let checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
+    if (checkIDForNewTasks === undefined) {
+      checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
+    }
+    let dayPageID = await getDayId();
+    if (dayPageID === undefined) {
+      dayPageID = await getDayId();
+    }
+    let weekPageID = await getWeekId();
+    if (weekPageID === undefined) {
+      weekPageID = await getWeekId();
+    }
+    let monthPageID = await getMonthId();
+    if (monthPageID === undefined) {
+      monthPageID = await monthPageID();
+    }
+    let response = await notion.pages.create({
       parent: {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
@@ -784,14 +810,14 @@ const addNewTask = async (fields) => {
         [NOTION_TASKS_TAG_MEMBER]: {
           relation: [
             {
-              id: memberID,
+              id: memberIDForNewTask,
             },
           ],
         },
         [NOTION_TASKS_TAG_CHECKS]: {
           relation: [
             {
-              id: checkID,
+              id: checkIDForNewTasks,
             },
           ],
         },
@@ -826,12 +852,26 @@ const addNewTask = async (fields) => {
 
 const addLogTask = async (fields) => {
   try {
-    const memberID = await isAvail(fields);
-
-    const checkID = await fetchCheckIn(memberID);
-    const dayPageID = await getDayId();
-    const weekPageID = await getWeekId();
-    const monthPageID = await getMonthId();
+    let memberID = await isAvail(fields);
+    if (memberID === undefined) {
+      memberID = await isAvail(fields);
+    }
+    let checkID = await fetchCheckIn(memberID);
+    if (checkID === undefined) {
+      checkID = await fetchCheckIn(memberID);
+    }
+    let dayPageID = await getDayId();
+    if (dayPageID === undefined) {
+      dayPageID = await getDayId();
+    }
+    let weekPageID = await getWeekId();
+    if (weekPageID === undefined) {
+      weekPageID = await getWeekId();
+    }
+    let monthPageID = await getMonthId();
+    if (monthPageID === undefined) {
+      monthPageID = await monthPageID();
+    }
     const response = await notion.pages.create({
       parent: {
         type: "database_id",
