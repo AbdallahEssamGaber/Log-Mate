@@ -650,12 +650,6 @@ const logTask = async (fields) => {
       filter: {
         and: [
           {
-            property: NOTION_TASKS_TAG_MEMBER,
-            relation: {
-              contains: memberID,
-            },
-          },
-          {
             property: NOTION_TASKS_TAG_DONE,
             formula: {
               checkbox: {
@@ -664,10 +658,20 @@ const logTask = async (fields) => {
             },
           },
           {
-            property: NOTION_TAG_NAME,
-            rich_text: {
-              equals: fields.taskName,
-            },
+            or: [
+              {
+                property: NOTION_TASKS_TAG_MEMBER,
+                relation: {
+                  contains: memberID,
+                },
+              },
+              {
+                property: NOTION_TAG_NAME,
+                rich_text: {
+                  equals: fields.taskName,
+                },
+              },
+            ],
           },
         ],
       },
@@ -755,12 +759,10 @@ const notionPreReminder = async () => {
 
       if (!name) continue;
       const date = await fetchTasks(name);
-      console.log(date);
       if (!discordUsername) {
         console.error(`username not aval in Notion for ${name}`);
         continue;
       }
-      console.log(name);
       if (!date) {
         teamObj[discordUsername] = true;
         continue;
@@ -770,36 +772,14 @@ const notionPreReminder = async () => {
       if (diff >= 4 || diff >= 4) teamObj[discordUsername] = true;
       else teamObj[discordUsername] = false;
     }
-    console.log(teamObj);
     return teamObj;
   } catch (error) {
     console.error(error);
   }
 };
-notionPreReminder();
 const addNewTask = async (fields) => {
   try {
-    let memberIDForNewTask = await isAvail(fields);
-    if (memberIDForNewTask === undefined) {
-      memberIDForNewTask = await isAvail(fields);
-    }
-    let checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
-    if (checkIDForNewTasks === undefined) {
-      checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
-    }
-    let dayPageID = await getDayId();
-    if (dayPageID === undefined) {
-      dayPageID = await getDayId();
-    }
-    let weekPageID = await getWeekId();
-    if (weekPageID === undefined) {
-      weekPageID = await getWeekId();
-    }
-    let monthPageID = await getMonthId();
-    if (monthPageID === undefined) {
-      monthPageID = await monthPageID();
-    }
-    let response = await notion.pages.create({
+    const responseID = await notion.pages.create({
       parent: {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
@@ -820,6 +800,31 @@ const addNewTask = async (fields) => {
             },
           ],
         },
+      },
+    });
+    let memberIDForNewTask = await isAvail(fields);
+    if (memberIDForNewTask === undefined) {
+      memberIDForNewTask = await isAvail(fields);
+    }
+    let checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
+    if (checkIDForNewTasks === undefined) {
+      checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
+    }
+    let dayPageID = await getDayId();
+    if (dayPageID === undefined) {
+      dayPageID = await getDayId();
+    }
+    let weekPageID = await getWeekId();
+    if (weekPageID === undefined) {
+      weekPageID = await getWeekId();
+    }
+    let monthPageID = await getMonthId();
+    if (monthPageID === undefined) {
+      monthPageID = await monthPageID();
+    }
+    const response = await notion.pages.update({
+      page_id: responseID.id,
+      properties: {
         [NOTION_TASKS_TAG_MEMBER]: {
           relation: [
             {
@@ -854,6 +859,11 @@ const addNewTask = async (fields) => {
               id: monthPageID,
             },
           ],
+        },
+        Tags: {
+          select: {
+            name: fields.taskTag,
+          },
         },
       },
     });
