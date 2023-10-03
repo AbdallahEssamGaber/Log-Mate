@@ -11,14 +11,14 @@ const parseTime = require("../../../functions/general/parseTime.js");
 module.exports = async (interaction, info) => {
   const startTimeSelectValues = [];
   const endTimeSelectValues = [];
-  for (let i = -2; i < 1; i += 0.5) {
+  for (let i = -1.5; i < 1.5; i += 0.5) {
     const value = timeCalc(i);
     const menuOptions = await newStringSelectMenuOptionBuilder({
       label: value,
       value: value,
     });
-    if (i !== 0.5) startTimeSelectValues.push(menuOptions);
-    if (i >= -1) endTimeSelectValues.push(menuOptions);
+    if (i !== 1) startTimeSelectValues.push(menuOptions);
+    if (i >= -0.5) endTimeSelectValues.push(menuOptions);
   }
   const startTimeSelect = (
     await newStringSelectMenuBuilder({

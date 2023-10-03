@@ -657,7 +657,10 @@ const fetchTasksUsers = async () => {
 
 const logTask = async (fields) => {
   try {
-    const memberID = await isAvail(fields);
+    let memberID = await isAvail(fields);
+    if (memberID === undefined) {
+      memberID = await isAvail(fields);
+    }
     if (!memberID) return console.log("User not found.");
 
     const responseID = await notion.databases.query({
@@ -693,7 +696,6 @@ const logTask = async (fields) => {
     });
 
     if (!responseID.results.length) return console.log("Task not found.");
-    console.log(fields.startTime, fields.endTime);
     const response = await notion.pages.update({
       page_id: responseID.results[0].id,
       properties: {
@@ -705,11 +707,13 @@ const logTask = async (fields) => {
         [NOTION_TASKS_TAG_STTIME]: {
           date: {
             start: fields.startTime,
+            time_zone: "Africa/Cairo"
           },
         },
         [NOTION_TASKS_TAG_ENTIME]: {
           date: {
             start: fields.endTime,
+            time_zone: "Africa/Cairo"
           },
         },
       },
@@ -874,12 +878,7 @@ const addNewTask = async (fields) => {
               id: monthPageID,
             },
           ],
-        },
-        Tags: {
-          select: {
-            name: fields.taskTag,
-          },
-        },
+        }
       },
     });
     console.log(response);
@@ -974,11 +973,15 @@ const addLogTask = async (fields) => {
         [NOTION_TASKS_TAG_STTIME]: {
           date: {
             start: fields.startTime,
+            time_zone: "Africa/Cairo",
+
           },
         },
         [NOTION_TASKS_TAG_ENTIME]: {
           date: {
             start: fields.endTime,
+            time_zone: "Africa/Cairo",
+
           },
         },
       },
