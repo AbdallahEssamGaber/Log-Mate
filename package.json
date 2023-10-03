@@ -13,6 +13,7 @@
     "@notionhq/client": "^2.2.11",
     "cron": "^2.4.3",
     "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0",
     "directory-tree": "^3.5.1",
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",

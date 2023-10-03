@@ -5,31 +5,20 @@ const {
   newStringSelectMenuOptionBuilder,
 } = require("../../utils/components/selectMenuBuilder.js");
 const { logTask } = require("../../../notion");
-const { addMins, subMins } = require("../../../functions/general/timeCalc.js");
+const timeCalc = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
 
 module.exports = async (interaction, info) => {
   const startTimeSelectValues = [];
   const endTimeSelectValues = [];
-  for (let i = 4; i > 0; i--) {
-    const values = subMins(i * 60);
-    for (const optionValue of values) {
-      const value = await newStringSelectMenuOptionBuilder({
-        label: optionValue,
-        value: optionValue,
-      });
-      startTimeSelectValues.push(value);
-    }
-  }
-  for (let i = 0; i >= -1; i--) {
-    const values = addMins(i * 60);
-    for (const optionValue of values) {
-      const value = await newStringSelectMenuOptionBuilder({
-        label: optionValue,
-        value: optionValue,
-      });
-      endTimeSelectValues.push(value);
-    }
+  for (let i = -1.5; i < 1.5; i += 0.5) {
+    const value = timeCalc(i);
+    const menuOptions = await newStringSelectMenuOptionBuilder({
+      label: value,
+      value: value,
+    });
+    if (i !== 1) startTimeSelectValues.push(menuOptions);
+    if (i >= -0.5) endTimeSelectValues.push(menuOptions);
   }
   const startTimeSelect = (
     await newStringSelectMenuBuilder({
