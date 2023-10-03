@@ -27,21 +27,22 @@ const NOTION_CHECKIN_TAG_DAY = "Day";
 const NOTION_CHECKIN_TAG_WEEK = "Week";
 const NOTION_CHECKIN_TAG_MONTH = "Month";
 const NOTION_CHECKIN_TAG_BLOCKERS = "blockers";
-const NOTION_CHECKIN_TAG_CREATEDTIME = "Created time";
 const NOTION_WORKER_TAG_USERID = "Discord UserId";
 const NOTION_WORKER_TAG_USERNAME = "Discord Username";
+const NOTION_WORKER_TAG_POSITIONLABEL = "Position Label";
+const NOTION_WORKER_TAG_TEAMLABEL = "Team Label";
 const NOTION_TASKS_TAG_MEMBER = "Workers";
 const NOTION_TASKS_TAG_STTIME = "Start Time";
 const NOTION_TASKS_TAG_ENTIME = "End Time";
 const NOTION_TASKS_TAG_CHECKS = "Checks";
-const NOTION_TASKS_TAG_CREATEDTIME = "Created time";
 const NOTION_TASKS_TAG_DONE = "Done?";
 const NOTION_TASKS_TAG_DAY = "Day";
 const NOTION_TASKS_TAG_WEEK = "Week";
 const NOTION_TASKS_TAG_MONTH = "Month";
 const NOTION_NAME_WORKERROLLUP = "Worker Name";
 const NOTION_TAG_NAME = "title";
-
+const NOTION_TAG_CREATEDTIME = "Created time";
+const NOTION_TIMEZONE = "Africa/Cairo";
 const notion = new Client({
   auth: NOTION_TOKEN,
 });
@@ -98,7 +99,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        "Position Label": {
+        [NOTION_WORKER_TAG_POSITIONLABEL]: {
           rich_text: [
             {
               text: {
@@ -107,7 +108,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        "Team Label": {
+        [NOTION_WORKER_TAG_TEAMLABEL]: {
           rich_text: [
             {
               text: {
@@ -159,7 +160,7 @@ const fetchCheckIn = async (memberID, fields) => {
       filter: {
         and: [
           {
-            property: NOTION_CHECKIN_TAG_CREATEDTIME,
+            property: NOTION_TAG_CREATEDTIME,
             date: {
               equals: date,
             },
@@ -190,7 +191,7 @@ const fetchCheckIns = async (fields) => {
     const response = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
-        property: "Created time",
+        property: NOTION_TAG_CREATEDTIME,
         date: {
           equals: date,
         },
@@ -243,10 +244,10 @@ const createCheckIn = async (
             },
           ],
         },
-        [NOTION_CHECKIN_TAG_CREATEDTIME]: {
+        [NOTION_TAG_CREATEDTIME]: {
           date: {
             start: new Date().toISOString(),
-            time_zone: "Africa/Cairo",
+            time_zone: NOTION_TIMEZONE,
           },
         },
         [NOTION_CHECKIN_TAG_MEMBER]: {
@@ -386,7 +387,7 @@ const checkInAvail = async (userId) => {
             },
           },
           {
-            property: NOTION_CHECKIN_TAG_CREATEDTIME,
+            property: NOTION_TAG_CREATEDTIME,
             date: {
               equals: date,
             },
@@ -434,13 +435,13 @@ const getWeekId = async () => {
       filter: {
         and: [
           {
-            property: "Created time",
+            property: NOTION_TAG_CREATEDTIME,
             date: {
               on_or_after: startOfWeekDate,
             },
           },
           {
-            property: "Created time",
+            property: NOTION_TAG_CREATEDTIME,
             date: {
               on_or_before: endOfWeekDate,
             },
@@ -465,13 +466,13 @@ const getMonthId = async () => {
       filter: {
         and: [
           {
-            property: "Created time",
+            property: NOTION_TAG_CREATEDTIME,
             date: {
               on_or_before: lastDay,
             },
           },
           {
-            property: "Created time",
+            property: NOTION_TAG_CREATEDTIME,
             date: {
               on_or_after: firstDay,
             },
@@ -601,7 +602,7 @@ const fetchTasksUsers = async () => {
     const responseChecks = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
-        property: NOTION_CHECKIN_TAG_CREATEDTIME,
+        property: NOTION_TAG_CREATEDTIME,
         date: {
           equals: date,
         },
@@ -623,7 +624,7 @@ const fetchTasksUsers = async () => {
             },
           },
           {
-            property: NOTION_TASKS_TAG_CREATEDTIME,
+            property: NOTION_TAG_CREATEDTIME,
             date: {
               equals: date,
             },
@@ -707,13 +708,13 @@ const logTask = async (fields) => {
         [NOTION_TASKS_TAG_STTIME]: {
           date: {
             start: fields.startTime,
-            time_zone: "Africa/Cairo"
+            time_zone: NOTION_TIMEZONE,
           },
         },
         [NOTION_TASKS_TAG_ENTIME]: {
           date: {
             start: fields.endTime,
-            time_zone: "Africa/Cairo"
+            time_zone: NOTION_TIMEZONE,
           },
         },
       },
@@ -740,7 +741,7 @@ const fetchTasks = async (name) => {
       },
       sorts: [
         {
-          property: NOTION_TASKS_TAG_CREATEDTIME,
+          property: NOTION_TAG_CREATEDTIME,
           direction: "descending",
         },
       ],
@@ -787,7 +788,7 @@ const notionPreReminder = async () => {
         teamObj[discordUsername] = true;
         continue;
       }
-      const diff = differenceInHours(new Date(), new Date("2023-09-25"));
+      const diff = differenceInHours(new Date(), new Date(date));
       if (diff >= 4 || diff >= 4) teamObj[discordUsername] = true;
       else teamObj[discordUsername] = false;
     }
@@ -796,6 +797,7 @@ const notionPreReminder = async () => {
     console.error(error);
   }
 };
+
 const addNewTask = async (fields) => {
   try {
     const responseID = await notion.pages.create({
@@ -878,7 +880,7 @@ const addNewTask = async (fields) => {
               id: monthPageID,
             },
           ],
-        }
+        },
       },
     });
     console.log(response);
@@ -973,15 +975,13 @@ const addLogTask = async (fields) => {
         [NOTION_TASKS_TAG_STTIME]: {
           date: {
             start: fields.startTime,
-            time_zone: "Africa/Cairo",
-
+            time_zone: NOTION_TIMEZONE,
           },
         },
         [NOTION_TASKS_TAG_ENTIME]: {
           date: {
             start: fields.endTime,
-            time_zone: "Africa/Cairo",
-
+            time_zone: NOTION_TIMEZONE,
           },
         },
       },
