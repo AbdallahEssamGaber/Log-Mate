@@ -1,8 +1,12 @@
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
 
-var moment = require("moment"); // require
-moment().format();
+const {
+  startOfMonth,
+  endOfMonth,
+  differenceInHours,
+  format,
+} = require("date-fns");
 const cron = require("cron");
 
 const {
@@ -24,7 +28,6 @@ const NOTION_CHECKIN_TAG_BLOCKERS = "blockers";
 const NOTION_CHECKIN_TAG_CREATEDTIME = "Created time";
 const NOTION_WORKER_TAG_USERID = "Discord UserId";
 const NOTION_WORKER_TAG_USERNAME = "Discord Username";
-const NOTION_WORKER_TAG_CREATEDTIME = "Created time";
 const NOTION_TASKS_TAG_MEMBER = "Workers";
 const NOTION_TASKS_TAG_STTIME = "Start Time";
 const NOTION_TASKS_TAG_ENTIME = "End Time";
@@ -34,7 +37,6 @@ const NOTION_TASKS_TAG_DONE = "Done?";
 const NOTION_TASKS_TAG_DAY = "Day";
 const NOTION_TASKS_TAG_WEEK = "Week";
 const NOTION_TASKS_TAG_MONTH = "Month";
-const NOTION_TASKS_TAG_USERID = "Discord userID";
 const NOTION_NAME_WORKERROLLUP = "Worker Name";
 const NOTION_TAG_NAME = "title";
 
@@ -437,11 +439,9 @@ const getWeekId = async () => {
 };
 const getMonthId = async () => {
   try {
-    const date = new Date(),
-      y = date.getFullYear(),
-      m = date.getMonth();
-    const firstDay = new Date(y, m, 1);
-    const lastDay = new Date(y, m + 1, 0);
+    const date = new Date();
+    const firstDay = format(startOfMonth(date), "yyyy-MM-dd");
+    const lastDay = format(endOfMonth(date), "yyyy-MM-dd");
     const response = await notion.databases.query({
       database_id: NOTION_MONTHS_DB_ID,
       filter: {
@@ -449,13 +449,13 @@ const getMonthId = async () => {
           {
             property: "Created time",
             date: {
-              before: lastDay.toISOString().split("T")[0],
+              on_or_before: lastDay,
             },
           },
           {
             property: "Created time",
             date: {
-              after: firstDay.toISOString().split("T")[0],
+              on_or_after: firstDay,
             },
           },
         ],
@@ -463,6 +463,7 @@ const getMonthId = async () => {
     });
 
     if (!response.results.length) return null;
+    console.log(response.results);
     return response.results[0].id;
   } catch (error) {
     console.error(error);
@@ -704,7 +705,7 @@ const fetchTasks = async (name) => {
     const response = await notion.databases.query({
       database_id: NOTION_TASKS_DB_ID,
       filter: {
-        property: [NOTION_TASKS_TAG_MEMBER],
+        property: "Worker Name",
         rollup: {
           any: {
             rich_text: {
@@ -715,18 +716,30 @@ const fetchTasks = async (name) => {
       },
       sorts: [
         {
-          property: [NOTION_TASKS_TAG_CREATEDTIME],
+          property: NOTION_TASKS_TAG_CREATEDTIME,
           direction: "descending",
         },
       ],
     });
-    const result = response.results[0].properties["End Time"].date.start
+    const result = response.results[0].properties["End Time"].date
       ? response.results[0].properties["End Time"].date.start
       : null;
 
     return result;
   } catch (error) {
     console.error(error);
+  }
+};
+
+// FETCH ALL THE PAGE IDS OF THE TEAM.
+const fetchTeamIds = async () => {
+  try {
+    const response = await notion.databases.query({
+      database_id: NOTION_WORKER_DB_ID,
+    });
+    return response.results;
+  } catch (error) {
+    console.error(error.body);
   }
 };
 
@@ -742,28 +755,28 @@ const notionPreReminder = async () => {
 
       if (!name) continue;
       const date = await fetchTasks(name);
+      console.log(date);
       if (!discordUsername) {
         console.error(`username not aval in Notion for ${name}`);
         continue;
       }
+      console.log(name);
       if (!date) {
         teamObj[discordUsername] = true;
         continue;
       }
-      const diff = moment(date).fromNow().split(" ");
-      if (
-        diff.includes("hours") &&
-        (parseInt(diff[0]) >= 4 || parseInt(diff[1]) >= 4)
-      )
-        teamObj[discordUsername] = true;
+      const diff = differenceInHours(new Date(), new Date("2023-09-25"));
+      console.log(date);
+      if (diff >= 4 || diff >= 4) teamObj[discordUsername] = true;
       else teamObj[discordUsername] = false;
     }
+    console.log(teamObj);
     return teamObj;
   } catch (error) {
     console.error(error);
   }
 };
-
+notionPreReminder();
 const addNewTask = async (fields) => {
   try {
     let memberIDForNewTask = await isAvail(fields);
