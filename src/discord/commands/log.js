@@ -50,7 +50,6 @@ module.exports = {
     if (focusedOption.name === "tag") choices = tags;
     else if (focusedOption.name === "task") {
       const { globalName } = interaction.user;
-      console.log(tasks);
       if (tasks && tasks[globalName] !== undefined) {
         choices = tasks[globalName];
       } else {

@@ -8,7 +8,8 @@ module.exports.addMins = (intMin) => {
 
   newDateObj.setMinutes(30, 0);
   dateObj.push(
-    newDateObj.toLocaleTimeString([], {
+    newDateObj.toLocaleTimeString("en-US", {
+      timeZone: "Africa/Dar_es_Salaam",
       hour: "2-digit",
       minute: "2-digit",
     })
@@ -16,7 +17,8 @@ module.exports.addMins = (intMin) => {
   newDateObj.setMinutes(0, 0);
 
   dateObj.push(
-    newDateObj.toLocaleTimeString([], {
+    newDateObj.toLocaleTimeString("en-US", {
+      timeZone: "Africa/Dar_es_Salaam",
       hour: "2-digit",
       minute: "2-digit",
     })
@@ -34,14 +36,16 @@ module.exports.subMins = (intMin) => {
   newDateObj.setMinutes(0, 0);
 
   dateObj.push(
-    newDateObj.toLocaleTimeString([], {
+    newDateObj.toLocaleTimeString("en-US", {
+      timeZone: "Africa/Dar_es_Salaam",
       hour: "2-digit",
       minute: "2-digit",
     })
   );
   newDateObj.setMinutes(30, 0);
   dateObj.push(
-    newDateObj.toLocaleTimeString([], {
+    newDateObj.toLocaleTimeString("en-US", {
+      timeZone: "Africa/Dar_es_Salaam",
       hour: "2-digit",
       minute: "2-digit",
     })

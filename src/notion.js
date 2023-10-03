@@ -246,6 +246,7 @@ const createCheckIn = async (
         [NOTION_CHECKIN_TAG_CREATEDTIME]: {
           date: {
             start: new Date().toISOString(),
+            time_zone: "Africa/Cairo",
           },
         },
         [NOTION_CHECKIN_TAG_MEMBER]: {
@@ -480,7 +481,6 @@ const getMonthId = async () => {
     });
 
     if (!response.results.length) return null;
-    console.log(response.results);
     return response.results[0].id;
   } catch (error) {
     console.error(error);
@@ -693,6 +693,7 @@ const logTask = async (fields) => {
     });
 
     if (!responseID.results.length) return console.log("Task not found.");
+    console.log(fields.startTime, fields.endTime);
     const response = await notion.pages.update({
       page_id: responseID.results[0].id,
       properties: {
