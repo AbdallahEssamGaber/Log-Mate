@@ -5,6 +5,8 @@ const {
   startOfMonth,
   endOfMonth,
   differenceInHours,
+  startOfWeek,
+  endOfWeek,
   format,
 } = require("date-fns");
 const cron = require("cron");
@@ -151,6 +153,7 @@ const isAvail = async (fields) => {
 
 const fetchCheckIn = async (memberID, fields) => {
   try {
+    const date = format(new Date(), "yyyy-MM-dd");
     const response = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
@@ -158,7 +161,7 @@ const fetchCheckIn = async (memberID, fields) => {
           {
             property: NOTION_CHECKIN_TAG_CREATEDTIME,
             date: {
-              equals: new Date().toISOString().split("T")[0],
+              equals: date,
             },
           },
           {
@@ -183,13 +186,13 @@ const fetchCheckIn = async (memberID, fields) => {
 
 const fetchCheckIns = async (fields) => {
   try {
-    const todays = new Date().toISOString().split("T")[0];
+    const date = format(new Date(), "yyyy-MM-dd");
     const response = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
         property: "Created time",
         date: {
-          equals: todays,
+          equals: date,
         },
       },
     });
@@ -366,6 +369,7 @@ const createTask = async (
 
 const checkInAvail = async (userId) => {
   try {
+    const date = format(new Date(), "yyyy-MM-dd");
     const response = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
@@ -383,7 +387,7 @@ const checkInAvail = async (userId) => {
           {
             property: NOTION_CHECKIN_TAG_CREATEDTIME,
             date: {
-              equals: new Date().toISOString().split("T")[0],
+              equals: date,
             },
           },
         ],
@@ -400,12 +404,13 @@ const checkInAvail = async (userId) => {
 
 const getDayId = async () => {
   try {
+    const date = format(new Date(), "yyyy-MM-dd");
     const response = await notion.databases.query({
       database_id: NOTION_DAYS_DB_ID,
       filter: {
         property: "Created time",
         date: {
-          equals: new Date().toISOString().split("T")[0],
+          equals: date,
         },
       },
     });
@@ -417,18 +422,29 @@ const getDayId = async () => {
 };
 const getWeekId = async () => {
   try {
-    let curr = new Date(); // get current date
-    let first = curr.getDate() - curr.getDay() - 1; // First day is the day of the month - the day of the week
-    let last = first + 7; // last day is the first day + 6
-
-    let lastday = new Date(curr.setDate(last));
+    const date = new Date(); // get current date
+    const startOfWeekDate = format(
+      startOfWeek(date, { weekStartsOn: 6 }),
+      "yyyy-MM-dd"
+    );
+    const endOfWeekDate = format(endOfWeek(date), "yyyy-MM-dd");
     const response = await notion.databases.query({
       database_id: NOTION_WEEKS_DB_ID,
       filter: {
-        property: "Created time",
-        date: {
-          on_or_before: lastday.toISOString().split("T")[0],
-        },
+        and: [
+          {
+            property: "Created time",
+            date: {
+              on_or_after: startOfWeekDate,
+            },
+          },
+          {
+            property: "Created time",
+            date: {
+              on_or_before: endOfWeekDate,
+            },
+          },
+        ],
       },
     });
     if (!response.results.length) return null;
@@ -437,6 +453,7 @@ const getWeekId = async () => {
     console.error(error);
   }
 };
+getWeekId();
 const getMonthId = async () => {
   try {
     const date = new Date();
@@ -540,10 +557,7 @@ const createCheckInTasks = async (fields) => {
     if (memberID === undefined) {
       memberID = await isAvail(fields);
     }
-    let date = new Date().toLocaleDateString("en-GB");
-    date = date
-      .replace(date.substring(6), date.slice(-2))
-      .replace(/(^|\/)0+/g, "$1");
+    let date = format(new Date(), "yy/M/d");
     const checkName = fields.name + " Check in " + date;
     let dayPageID = await getDayId();
     if (dayPageID === undefined) {
@@ -583,12 +597,13 @@ const createCheckInTasks = async (fields) => {
 
 const fetchTasksUsers = async () => {
   try {
+    const date = format(new Date(), "yyyy-MM-dd");
     const responseChecks = await notion.databases.query({
       database_id: NOTION_CHECKIN_DB_ID,
       filter: {
         property: NOTION_CHECKIN_TAG_CREATEDTIME,
         date: {
-          equals: new Date().toISOString().split("T")[0],
+          equals: date,
         },
       },
     });
@@ -610,7 +625,7 @@ const fetchTasksUsers = async () => {
           {
             property: NOTION_TASKS_TAG_CREATEDTIME,
             date: {
-              equals: new Date().toISOString().split("T")[0],
+              equals: date,
             },
           },
         ],
@@ -768,7 +783,6 @@ const notionPreReminder = async () => {
         continue;
       }
       const diff = differenceInHours(new Date(), new Date("2023-09-25"));
-      console.log(date);
       if (diff >= 4 || diff >= 4) teamObj[discordUsername] = true;
       else teamObj[discordUsername] = false;
     }
@@ -783,12 +797,6 @@ const addNewTask = async (fields) => {
       parent: {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
-      },
-      icon: {
-        type: "external",
-        external: {
-          url: "https://www.notion.so/icons/checklist_blue.svg",
-        },
       },
       properties: {
         [NOTION_TAG_NAME]: {
@@ -824,6 +832,12 @@ const addNewTask = async (fields) => {
     }
     const response = await notion.pages.update({
       page_id: responseID.id,
+      icon: {
+        type: "external",
+        external: {
+          url: "https://www.notion.so/icons/checklist_blue.svg",
+        },
+      },
       properties: {
         [NOTION_TASKS_TAG_MEMBER]: {
           relation: [
