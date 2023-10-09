@@ -22,15 +22,17 @@ module.exports = {
 *${todayWorks}*`,
       ephemeral: true,
     });
-    let blockersResponse = `*With no blockers*`;
+    let blockersResponse = `With no blockers.`;
     if (blockers) {
-      blockersResponse = `With **blockers**:
-*${blockers}*`;
+      blockersResponse = `With blockers:
+${blockers}`;
     }
     interaction.guild.channels.cache.get(process.env.DEV_DISCORD_CHANNEL_ID)
-      .send(`***${info.name}*** Just checked in those tasks:
-*${todayWorks}*
-${blockersResponse}`);
+      .send(`<@${info.userId}> just checked in those tasks:
+\`\`\`
+${todayWorks}
+${blockersResponse}
+\`\`\``);
     await createCheckInTasks(info);
   },
 };
