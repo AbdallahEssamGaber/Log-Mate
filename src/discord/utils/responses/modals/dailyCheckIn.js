@@ -17,13 +17,20 @@ module.exports = {
       name: user.globalName,
       userId: user.id,
     };
-
     await interaction.reply({
       content: `best of luck with those: 
-*${interaction.fields.getTextInputValue("todayTask")}*`,
+*${todayWorks}*`,
       ephemeral: true,
     });
-
+    let blockersResponse = `*With no blockers*`;
+    if (blockers) {
+      blockersResponse = `With **blockers**:
+*${blockers}*`;
+    }
+    interaction.guild.channels.cache.get(process.env.DEV_DISCORD_CHANNEL_ID)
+      .send(`***${info.name}*** Just checked in those tasks:
+*${todayWorks}*
+${blockersResponse}`);
     await createCheckInTasks(info);
   },
 };

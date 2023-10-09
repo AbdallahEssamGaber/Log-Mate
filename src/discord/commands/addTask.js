@@ -22,7 +22,7 @@ module.exports = {
         .setDescription("Type the task you want to add.")
         .setRequired(true)
     ),
-  async execute(interaction) {
+  async execute(interaction, client) {
     const taskName = interaction.options.getString("task");
     const tag = interaction.options.getString("tag");
     const user = interaction.user;
@@ -44,6 +44,9 @@ module.exports = {
       content: `*${taskName}* added to your task list.`,
       ephemeral: true,
     });
+    interaction.guild.channels.cache
+      .get(process.env.DEV_DISCORD_CHANNEL_ID)
+      .send(`***${info.name}*** Just Added a task: ${taskName}`);
     await addNewTask(info);
   },
 };
