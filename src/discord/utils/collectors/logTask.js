@@ -45,8 +45,7 @@ module.exports = async (interaction, info) => {
   const row3 = new ActionRowBuilder().addComponents(confirm);
 
   const response = await interaction.reply({
-    content: `\`\`\`Task: ${info.taskName}✅\`\`\`
-Chose It's Start and End Time For The Task Below, Please.`,
+    content: `\`\`\`Task: ${info.taskName}✅\`\`\`\nChose It's Start and End Time For The Task Below, Please.`,
     components: [row, row2, row3],
     ephemeral: true,
   });
@@ -95,16 +94,17 @@ Chose It's Start and End Time For The Task Below, Please.`,
       let startTime = taskLog.startTimeSelector;
       let endTime = taskLog.endTimeSelector;
       await response.edit({
-        content: `Way to gooo👏👏
-You finished ${info.taskName} from ${taskLog.startTimeSelector} until ${taskLog.endTimeSelector}`,
+        content: `Way to gooo👏👏\nYou finished ${info.taskName} from ${taskLog.startTimeSelector} until ${taskLog.endTimeSelector}`,
         components: [],
       });
       startTime = parseTime(startTime);
       endTime = parseTime(endTime);
       info = { ...info, startTime, endTime };
-      interaction.guild.channels.cache.get(process.env.DEV_DISCORD_CHANNEL_ID)
-        .send(`***${info.name}*** Just Logged:
-${info.taskName} from ${taskLog.startTimeSelector} until ${taskLog.endTimeSelector}`);
+      interaction.guild.channels.cache
+        .get(process.env.DEV_DISCORD_CHANNEL_ID)
+        .send(
+          `<@${info.userId}> just Logged\n\`\`\`\n${info.taskName}\nFrom ${taskLog.startTimeSelector} Until ${taskLog.endTimeSelector}\n\`\`\``
+        );
       await logTask(info);
     } else if (
       (taskLog["startTimeSelector"] === undefined ||

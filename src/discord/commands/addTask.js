@@ -46,7 +46,7 @@ module.exports = {
     });
     interaction.guild.channels.cache
       .get(process.env.DEV_DISCORD_CHANNEL_ID)
-      .send(`***${info.name}*** Just Added a task: ${taskName}`);
+      .send(`<@${info.userId}> Just Added a task: \`${taskName}\``);
     await addNewTask(info);
   },
 };

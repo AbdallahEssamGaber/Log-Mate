@@ -22,12 +22,10 @@ const {
 } = process.env;
 
 const NOTION_CHECKIN_TAG_MEMBER = "Worker";
-const NOTION_CHECKIN_TAG_USERID = "Discord UserID";
 const NOTION_CHECKIN_TAG_DAY = "Day";
 const NOTION_CHECKIN_TAG_WEEK = "Week";
 const NOTION_CHECKIN_TAG_MONTH = "Month";
 const NOTION_CHECKIN_TAG_BLOCKERS = "blockers";
-const NOTION_WORKER_TAG_USERID = "Discord UserId";
 const NOTION_WORKER_TAG_USERNAME = "Discord Username";
 const NOTION_WORKER_TAG_POSITIONLABEL = "Position Label";
 const NOTION_WORKER_TAG_TEAMLABEL = "Team Label";
@@ -40,6 +38,7 @@ const NOTION_TASKS_TAG_DAY = "Day";
 const NOTION_TASKS_TAG_WEEK = "Week";
 const NOTION_TASKS_TAG_MONTH = "Month";
 const NOTION_NAME_WORKERROLLUP = "Worker Name";
+const NOTION_TAG_DISCORDUSERID = "Discord userID";
 const NOTION_TAG_NAME = "title";
 const NOTION_TAG_CREATEDTIME = "Created time";
 const NOTION_TIMEZONE = "Africa/Cairo";
@@ -90,7 +89,7 @@ const createMember = async (fields) => {
             },
           ],
         },
-        [NOTION_WORKER_TAG_USERID]: {
+        [NOTION_TAG_DISCORDUSERID]: {
           rich_text: [
             {
               text: {
@@ -130,7 +129,7 @@ const isAvail = async (fields) => {
     const response = await notion.databases.query({
       database_id: NOTION_WORKER_DB_ID,
       filter: {
-        property: NOTION_WORKER_TAG_USERID,
+        property: NOTION_TAG_DISCORDUSERID,
         rich_text: {
           equals: fields.userId,
         },
@@ -202,13 +201,11 @@ const fetchCheckIns = async (fields) => {
       return checkInUsers;
     }
     for (const result of response.results) {
-      const workerRollupArray =
-        result.properties[NOTION_NAME_WORKERROLLUP].rollup.array;
-      if (!workerRollupArray.length) continue;
-      checkInUsers.push(workerRollupArray[0].title[0].text.content);
+      const discordUserId = result.properties["Discord UserID"].rollup.array;
+      if (!discordUserId.length) continue;
+      checkInUsers.push(discordUserId[0].rich_text[0].text.content);
     }
     return checkInUsers;
-    // return response.id;
   } catch (error) {
     console.error(error);
   }
@@ -377,7 +374,7 @@ const checkInAvail = async (userId) => {
       filter: {
         and: [
           {
-            property: NOTION_CHECKIN_TAG_USERID,
+            property: NOTION_TAG_DISCORDUSERID,
             rollup: {
               any: {
                 rich_text: {
@@ -637,18 +634,18 @@ const fetchTasksUsers = async () => {
       return tasks;
     }
     for (const result of response.results) {
-      const workerRollupArray =
-        result.properties[NOTION_NAME_WORKERROLLUP].rollup.array;
-      if (!workerRollupArray.length) continue;
-      const memberName = workerRollupArray[0].title[0].text.content;
+      const discordUserId =
+        result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
+      if (!discordUserId.length) continue;
+      const memberDiscordUserId = discordUserId[0].rich_text[0].text.content;
       if (!result.properties.Name.title[0]) continue;
       const title = result.properties.Name.title[0].plain_text.replace(
         " ON LOGGING",
         ""
       );
-      tasks[memberName] = !tasks[memberName]
+      tasks[memberDiscordUserId] = !tasks[memberDiscordUserId]
         ? [title]
-        : (tasks[memberName] = [...tasks[memberName], title]);
+        : (tasks[memberDiscordUserId] = [...tasks[memberDiscordUserId], title]);
     }
     return tasks;
   } catch (error) {
@@ -774,7 +771,7 @@ const notionPreReminder = async () => {
     const teamIDs = await fetchTeamIds();
     for (const item of teamIDs) {
       const title = item.properties.Name.title[0];
-      const richText = item.properties["Discord UserId"].rich_text[0];
+      const richText = item.properties[NOTION_TAG_DISCORDUSERID].rich_text[0];
       const name = title ? title.plain_text : null;
       const discordUsername = richText ? richText.plain_text : null;
 
