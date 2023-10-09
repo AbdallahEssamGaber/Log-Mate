@@ -49,9 +49,9 @@ module.exports = {
     let choices;
     if (focusedOption.name === "tag") choices = tags;
     else if (focusedOption.name === "task") {
-      const { globalName } = interaction.user;
-      if (tasks && tasks[globalName] !== undefined) {
-        choices = tasks[globalName];
+      const { id } = interaction.user;
+      if (tasks && tasks[id] !== undefined) {
+        choices = tasks[id];
       } else {
         choices = ["TYPE THE TASK YOU WANT TO ADD AND LOG."];
       }
