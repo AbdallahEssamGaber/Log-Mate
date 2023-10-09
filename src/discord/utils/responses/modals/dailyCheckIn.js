@@ -18,21 +18,18 @@ module.exports = {
       userId: user.id,
     };
     await interaction.reply({
-      content: `best of luck with those: 
-*${todayWorks}*`,
+      content: `best of luck with those: \n*${todayWorks}*`,
       ephemeral: true,
     });
     let blockersResponse = `With no blockers.`;
     if (blockers) {
-      blockersResponse = `With blockers:
-${blockers}`;
+      blockersResponse = `With blockers:\n${blockers}`;
     }
-    interaction.guild.channels.cache.get(process.env.DEV_DISCORD_CHANNEL_ID)
-      .send(`<@${info.userId}> just checked in those tasks:
-\`\`\`
-${todayWorks}
-${blockersResponse}
-\`\`\``);
+    interaction.guild.channels.cache
+      .get(process.env.DEV_DISCORD_CHANNEL_ID)
+      .send(
+        `<@${info.userId}> just checked in those tasks:\n\`\`\`\n${todayWorks}\n${blockersResponse}\n\`\`\``
+      );
     await createCheckInTasks(info);
   },
 };

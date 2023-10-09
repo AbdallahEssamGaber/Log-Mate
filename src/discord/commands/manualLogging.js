@@ -140,17 +140,25 @@ module.exports = {
       info = { ...info, startTime: startTimeParsed, endTime: endTimeParsed };
       if (tasks[info.name] !== undefined && tasks[info.name].includes(chose)) {
         await interaction.reply({
-          content: `Way to gooo👏👏
-You finished ${info.taskName} from ${startTime} until ${endTime}`,
+          content: `Way to gooo👏👏\nYou finished ${info.taskName} from ${startTime} until ${endTime}`,
           ephemeral: true,
         });
+        interaction.guild.channels.cache
+          .get(process.env.DEV_DISCORD_CHANNEL_ID)
+          .send(
+            `<@${info.userId}> just Logged\n\`\`\`\n${info.taskName}\nFrom ${startTime} Until ${endTime}\n\`\`\``
+          );
         await logTask(info);
       } else {
         await interaction.reply({
-          content: `Way to gooo👏👏
-You finished ${info.taskName} from ${startTime} until ${endTime}`,
+          content: `Way to gooo👏👏\nTask added and finished ${info.taskName} from ${startTime} until ${endTime}`,
           ephemeral: true,
         });
+        interaction.guild.channels.cache
+          .get(process.env.DEV_DISCORD_CHANNEL_ID)
+          .send(
+            `<@${info.userId}> just Added and Logged\n\`\`\`\n${info.taskName}\nFrom ${startTime} Until ${endTime}\n\`\`\``
+          );
         await addLogTask(info);
       }
     }
