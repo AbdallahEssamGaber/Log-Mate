@@ -81,7 +81,7 @@ module.exports = {
       taskTag,
       taskName: chose,
     };
-    if (!checkIns.includes(info.name)) {
+    if (checkIns && !checkIns.includes(info.name)) {
       return interaction.reply({
         content: "*Please check in first.*",
         ephemeral: true,

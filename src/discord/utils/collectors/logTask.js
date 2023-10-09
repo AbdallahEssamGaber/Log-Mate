@@ -102,6 +102,9 @@ You finished ${info.taskName} from ${taskLog.startTimeSelector} until ${taskLog.
       startTime = parseTime(startTime);
       endTime = parseTime(endTime);
       info = { ...info, startTime, endTime };
+      interaction.guild.channels.cache.get(process.env.DEV_DISCORD_CHANNEL_ID)
+        .send(`***${info.name}*** Just Logged:
+${info.taskName} from ${taskLog.startTimeSelector} until ${taskLog.endTimeSelector}`);
       await logTask(info);
     } else if (
       (taskLog["startTimeSelector"] === undefined ||
