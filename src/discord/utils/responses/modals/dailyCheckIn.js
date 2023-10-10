@@ -1,3 +1,5 @@
+const addCheckedInRole = require("../../../../functions/checkInRole");
+
 const { createCheckInTasks } = require("../../../../notion");
 
 module.exports = {
@@ -5,6 +7,8 @@ module.exports = {
     name: "dailyCheckIn",
   },
   async execute(interaction, client) {
+    await addCheckedInRole(interaction);
+
     const todayWorks = interaction.fields.getTextInputValue("todayTask");
     const blockers = interaction.fields.getTextInputValue("blockers");
     const user = interaction.user;

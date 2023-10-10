@@ -3,6 +3,7 @@ const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
 const { checkInAvail } = require("../../notion.js");
+const { logLevelSeverity } = require("@notionhq/client/build/src/logging.js");
 //TODOincaseDelayHappened: check check-ins all to avoid the lag of loading.
 module.exports = {
   data: new SlashCommandBuilder()
