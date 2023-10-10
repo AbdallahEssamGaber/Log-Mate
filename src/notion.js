@@ -38,7 +38,7 @@ const NOTION_TASKS_TAG_DAY = "Day";
 const NOTION_TASKS_TAG_WEEK = "Week";
 const NOTION_TASKS_TAG_MONTH = "Month";
 const NOTION_NAME_WORKERROLLUP = "Worker Name";
-const NOTION_TAG_DISCORDUSERID = "Discord userID";
+const NOTION_TAG_DISCORDUSERID = "Discord UserID";
 const NOTION_TAG_NAME = "title";
 const NOTION_TAG_CREATEDTIME = "Created time";
 const NOTION_TIMEZONE = "Africa/Cairo";
@@ -201,7 +201,7 @@ const fetchCheckIns = async (fields) => {
       return checkInUsers;
     }
     for (const result of response.results) {
-      const discordUserId = result.properties["Discord UserID"].rollup.array;
+      const discordUserId = result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
       if (!discordUserId.length) continue;
       checkInUsers.push(discordUserId[0].rich_text[0].text.content);
     }
