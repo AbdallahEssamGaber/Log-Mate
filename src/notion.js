@@ -201,7 +201,8 @@ const fetchCheckIns = async (fields) => {
       return checkInUsers;
     }
     for (const result of response.results) {
-      const discordUserId = result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
+      const discordUserId =
+        result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
       if (!discordUserId.length) continue;
       checkInUsers.push(discordUserId[0].rich_text[0].text.content);
     }
@@ -555,7 +556,7 @@ const createCheckInTasks = async (fields) => {
     if (memberID === undefined) {
       memberID = await isAvail(fields);
     }
-    let date = format(new Date(), "yy/M/d");
+    let date = format(new Date(), "d/M/yy");
     const checkName = fields.name + " Check in " + date;
     let dayPageID = await getDayId();
     if (dayPageID === undefined) {
