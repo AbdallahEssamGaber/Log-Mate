@@ -100,7 +100,7 @@ module.exports = {
       username: user.username,
       taskTag,
     };
-    if (!checkIns.includes(info.name)) {
+    if (checkIns && !checkIns.includes(info.userId)) {
       return interaction.reply({
         content: "*Please check in first.*",
         ephemeral: true,
@@ -138,7 +138,10 @@ module.exports = {
         return;
       }
       info = { ...info, startTime: startTimeParsed, endTime: endTimeParsed };
-      if (tasks[info.name] !== undefined && tasks[info.name].includes(chose)) {
+      if (
+        tasks[info.userId] !== undefined &&
+        tasks[info.userId].includes(chose)
+      ) {
         await interaction.reply({
           content: `Way to gooo👏👏\nYou finished ${info.taskName} from ${startTime} until ${endTime}`,
           ephemeral: true,

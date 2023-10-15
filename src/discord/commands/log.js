@@ -81,7 +81,7 @@ module.exports = {
       taskTag,
       taskName: chose,
     };
-    if (checkIns && !checkIns.includes(info.name)) {
+    if (checkIns && !checkIns.includes(info.userId)) {
       return interaction.reply({
         content: "*Please check in first.*",
         ephemeral: true,
@@ -96,8 +96,8 @@ module.exports = {
     } else {
       logTaskCollector(interaction, info);
       if (
-        tasks[info.name] === undefined ||
-        !tasks[info.name].includes(info.taskName)
+        tasks[info.userId] === undefined ||
+        !tasks[info.userId].includes(info.taskName)
       ) {
         await addNewTask(info);
       }

@@ -200,6 +200,7 @@ const fetchCheckIns = async (fields) => {
     if (!response.results.length) {
       return checkInUsers;
     }
+
     for (const result of response.results) {
       const discordUserId =
         result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;

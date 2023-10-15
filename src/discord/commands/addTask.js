@@ -34,7 +34,7 @@ module.exports = {
       name: user.globalName,
       userId: user.id,
     };
-    if (!checkIns.includes(info.name)) {
+    if (checkIns && !checkIns.includes(info.userId)) {
       return interaction.reply({
         content: "*Please check in first.*",
         ephemeral: true,
