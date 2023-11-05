@@ -2,7 +2,6 @@ const Project = require("../../schemas/project");
 
 const { SlashCommandBuilder } = require("discord.js");
 
-// const { addNewTask } = require("../../notion");
 const { format } = require("date-fns");
 const CheckInAvail = require("../utils/checkers/checkInAvail");
 

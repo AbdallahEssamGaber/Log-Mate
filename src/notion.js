@@ -185,34 +185,6 @@ const fetchCheckIn = async (memberID, fields) => {
   }
 };
 
-const fetchCheckIns = async (fields) => {
-  try {
-    const date = format(new Date(), "yyyy-MM-dd");
-    const response = await notion.databases.query({
-      database_id: NOTION_CHECKIN_DB_ID,
-      filter: {
-        property: NOTION_TAG_CREATEDTIME,
-        date: {
-          equals: date,
-        },
-      },
-    });
-    let checkInUsers = [];
-    if (!response.results.length) {
-      return checkInUsers;
-    }
-    for (const result of response.results) {
-      const discordUserId =
-        result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
-      if (!discordUserId.length) continue;
-      checkInUsers.push(discordUserId[0].rich_text[0].text.content);
-    }
-    return checkInUsers;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const createCheckIn = async (
   memberID,
   checkName,
@@ -363,41 +335,6 @@ const createTask = async (
       },
     });
     console.log(response);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const checkInAvail = async (userId) => {
-  try {
-    const date = format(new Date(), "yyyy-MM-dd");
-    const response = await notion.databases.query({
-      database_id: NOTION_CHECKIN_DB_ID,
-      filter: {
-        and: [
-          {
-            property: NOTION_TAG_DISCORDUSERID,
-            rollup: {
-              any: {
-                rich_text: {
-                  contains: userId,
-                },
-              },
-            },
-          },
-          {
-            property: NOTION_TAG_CREATEDTIME,
-            date: {
-              equals: date,
-            },
-          },
-        ],
-      },
-    });
-    if (response.results.length == 0) {
-      return false;
-    }
-    return true;
   } catch (error) {
     console.error(error);
   }
@@ -591,66 +528,6 @@ const createCheckInTasks = async (fields) => {
         monthPageID
       );
     }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const fetchTasksUsers = async () => {
-  try {
-    const date = format(new Date(), "yyyy-MM-dd");
-    const responseChecks = await notion.databases.query({
-      database_id: NOTION_CHECKIN_DB_ID,
-      filter: {
-        property: NOTION_TAG_CREATEDTIME,
-        date: {
-          equals: date,
-        },
-      },
-    });
-    if (!responseChecks.results.length) {
-      return {};
-    }
-    const response = await notion.databases.query({
-      database_id: NOTION_TASKS_DB_ID,
-      filter: {
-        and: [
-          {
-            property: NOTION_TASKS_TAG_DONE,
-            formula: {
-              checkbox: {
-                does_not_equal: true,
-              },
-            },
-          },
-          {
-            property: NOTION_TAG_CREATEDTIME,
-            date: {
-              equals: date,
-            },
-          },
-        ],
-      },
-    });
-    let tasks = {};
-    if (!response.results.length) {
-      return tasks;
-    }
-    for (const result of response.results) {
-      const discordUserId =
-        result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
-      if (!discordUserId.length) continue;
-      const memberDiscordUserId = discordUserId[0].rich_text[0].text.content;
-      if (!result.properties.Name.title[0]) continue;
-      const title = result.properties.Name.title[0].plain_text.replace(
-        " ON LOGGING",
-        ""
-      );
-      tasks[memberDiscordUserId] = !tasks[memberDiscordUserId]
-        ? [title]
-        : (tasks[memberDiscordUserId] = [...tasks[memberDiscordUserId], title]);
-    }
-    return tasks;
   } catch (error) {
     console.error(error);
   }
@@ -1024,11 +901,8 @@ const addLogTask = async (fields) => {
 
 module.exports = {
   tags,
-  checkInAvail,
   createCheckInTasks,
-  fetchTasksUsers,
   logTask,
-  fetchCheckIns,
   addNewTask,
   addLogTask,
   notionPreReminder,
