@@ -1,33 +1,32 @@
-const CheckIn = require("../../schemas/checkIn");
-const Task = require("../../schemas/task");
+const Project = require("../../schemas/project");
 
 const { SlashCommandBuilder } = require("discord.js");
 
-const { addNewTask } = require("../../notion");
+// const { addNewTask } = require("../../notion");
 const { format } = require("date-fns");
 const CheckInAvail = require("../utils/checkers/checkInAvail");
+
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("add-task")
-    .setDescription("Add a Task!")
+    .setName("add-project")
+    .setDescription("Add a Project!")
     .addStringOption((option) =>
       option
-        .setName("task")
-        .setDescription("Type the task you want to add.")
+        .setName("project")
+        .setDescription("Type the project you want to add.")
         .setRequired(true)
     ),
   async execute(interaction, client) {
-    const taskName = interaction.options.getString("task");
+    const projectName = interaction.options.getString("project");
     const user = interaction.user;
 
     const info = {
-      taskName,
+      projectName,
       username: user.username,
       name: user.globalName,
       userId: user.id,
     };
     const date = format(new Date(), "yyyy-MM-dd");
-
     const checkAvail = await CheckInAvail(info.userId, date);
     if (!checkAvail) {
       return interaction.reply({
@@ -36,21 +35,19 @@ module.exports = {
       });
     }
     await interaction.reply({
-      content: `*${taskName}* added to your task list.`,
+      content: `*${projectName}* added to your projects list.`,
       ephemeral: true,
     });
     interaction.guild.channels.cache
       .get(process.env.DEV_DISCORD_CHANNEL_ID)
-      .send(`<@${info.userId}> Just Added a task: \`${taskName}\``);
+      .send(`<@${info.userId}> Just Added a project: \`${projectName}\``);
 
-    const task = new Task({
-      name: info.taskName,
+    const project = new Project({
+      name: info.projectName,
       discord_userId: info.userId,
-      created_time: date,
       done: false,
     });
-    await task.save().catch(console.error);
-    console.log(task);
-    await addNewTask(info);
+    await project.save().catch(console.error);
+    console.log(project);
   },
 };

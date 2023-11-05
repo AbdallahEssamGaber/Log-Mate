@@ -40,6 +40,7 @@ const NOTION_TASKS_TAG_MONTH = "Month";
 const NOTION_NAME_WORKERROLLUP = "Worker Name";
 const NOTION_TAG_DISCORDUSERID = "Discord UserID";
 const NOTION_TAG_NAME = "title";
+const NOTION_TAG_PROJECT = "Project";
 const NOTION_TAG_CREATEDTIME = "Created time";
 const NOTION_TIMEZONE = "Africa/Cairo";
 const notion = new Client({
@@ -453,7 +454,7 @@ const getWeekId = async () => {
     console.error(error);
   }
 };
-getWeekId();
+
 const getMonthId = async () => {
   try {
     const date = new Date();
@@ -485,6 +486,7 @@ const getMonthId = async () => {
     console.error(error);
   }
 };
+
 (async () => {
   try {
     new cron.CronJob("0 0 9 * * *", async () => {
@@ -661,7 +663,6 @@ const logTask = async (fields) => {
       memberID = await isAvail(fields);
     }
     if (!memberID) return console.log("User not found.");
-
     const responseID = await notion.databases.query({
       database_id: NOTION_TASKS_DB_ID,
       filter: {
@@ -693,31 +694,47 @@ const logTask = async (fields) => {
         ],
       },
     });
-
     if (!responseID.results.length) return console.log("Task not found.");
-    const response = await notion.pages.update({
-      page_id: responseID.results[0].id,
-      properties: {
-        Tags: {
-          select: {
-            name: fields.taskTag,
+    for (let i = 0; i < responseID.results.length; i++) {
+      const name = responseID.results[i].properties.Name.title[0].text.content;
+      if (name === fields.taskName) {
+        let response = await notion.pages.update({
+          page_id: responseID.results[i].id,
+          properties: {
+            Tags: {
+              select: {
+                name: fields.taskTag,
+              },
+            },
+            [NOTION_TASKS_TAG_STTIME]: {
+              date: {
+                start: fields.startTime,
+                time_zone: NOTION_TIMEZONE,
+              },
+            },
+            [NOTION_TASKS_TAG_ENTIME]: {
+              date: {
+                start: fields.endTime,
+                time_zone: NOTION_TIMEZONE,
+              },
+            },
           },
-        },
-        [NOTION_TASKS_TAG_STTIME]: {
-          date: {
-            start: fields.startTime,
-            time_zone: NOTION_TIMEZONE,
-          },
-        },
-        [NOTION_TASKS_TAG_ENTIME]: {
-          date: {
-            start: fields.endTime,
-            time_zone: NOTION_TIMEZONE,
-          },
-        },
-      },
-    });
-    console.log(response);
+        });
+        if (fields.project) {
+          response = await notion.pages.update({
+            page_id: response.id,
+            properties: {
+              [NOTION_TAG_PROJECT]: {
+                select: {
+                  name: fields.project,
+                },
+              },
+            },
+          });
+        }
+        console.log(response);
+      }
+    }
   } catch (error) {
     console.log(error);
   }
@@ -822,6 +839,9 @@ const addNewTask = async (fields) => {
     let checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
     if (checkIDForNewTasks === undefined) {
       checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
+    } else if (checkIDForNewTasks == null) {
+      console.log("NAH CHECK IN NOT AVAIL");
+      return;
     }
     let dayPageID = await getDayId();
     if (dayPageID === undefined) {
@@ -909,7 +929,7 @@ const addLogTask = async (fields) => {
     if (monthPageID === undefined) {
       monthPageID = await monthPageID();
     }
-    const response = await notion.pages.create({
+    let response = await notion.pages.create({
       parent: {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
@@ -984,6 +1004,18 @@ const addLogTask = async (fields) => {
         },
       },
     });
+    if (fields.project) {
+      response = await notion.pages.update({
+        page_id: response.id,
+        properties: {
+          [NOTION_TAG_PROJECT]: {
+            select: {
+              name: fields.project,
+            },
+          },
+        },
+      });
+    }
     console.log(response);
   } catch (error) {
     console.error(error);

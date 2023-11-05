@@ -1,4 +1,4 @@
-const loadFiles = require("../../functions/fileLoader");
+const loadFiles = require("../../../functions/fileLoader");
 module.exports = {
   name: "ready",
   once: true, //When the client is ready, run this code (only once)

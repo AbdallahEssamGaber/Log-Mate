@@ -2,16 +2,19 @@ const { SlashCommandBuilder, ActionRowBuilder } = require("discord.js");
 
 const { newModal, newInput } = require("../utils/components/modalBuilder.js");
 
-const { checkInAvail } = require("../../notion.js");
-const { logLevelSeverity } = require("@notionhq/client/build/src/logging.js");
-//TODOincaseDelayHappened: check check-ins all to avoid the lag of loading.
+const { format } = require("date-fns");
+const CheckInAvail = require("../utils/checkers/checkInAvail.js");
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("check-in")
     .setDescription("Daily-Checking-In!"),
-  async execute(interaction, client) {
+  async execute(interaction) {
     const userId = interaction.user.id;
-    const checkAvail = await checkInAvail(userId);
+
+    const date = format(new Date(), "yyyy-MM-dd");
+    const checkAvail = await CheckInAvail(userId, date);
+
     if (checkAvail) {
       await interaction.reply({
         content: "*You've already checked-in.*",
