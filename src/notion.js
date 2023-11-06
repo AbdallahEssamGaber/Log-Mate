@@ -584,13 +584,13 @@ const logTask = async (fields) => {
             },
             [NOTION_TASKS_TAG_STTIME]: {
               date: {
-                start: fields.startTime,
+                start: fields.startTimeParsed,
                 time_zone: NOTION_TIMEZONE,
               },
             },
             [NOTION_TASKS_TAG_ENTIME]: {
               date: {
-                start: fields.endTime,
+                start: fields.endTimeParsed,
                 time_zone: NOTION_TIMEZONE,
               },
             },
@@ -795,13 +795,13 @@ const addLogTask = async (fields) => {
         },
         [NOTION_TASKS_TAG_STTIME]: {
           date: {
-            start: fields.startTime,
+            start: fields.startTimeParsed,
             time_zone: NOTION_TIMEZONE,
           },
         },
         [NOTION_TASKS_TAG_ENTIME]: {
           date: {
-            start: fields.endTime,
+            start: fields.endTimeParsed,
             time_zone: NOTION_TIMEZONE,
           },
         },
