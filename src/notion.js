@@ -617,79 +617,6 @@ const logTask = async (fields) => {
   }
 };
 
-const fetchTasks = async (name) => {
-  try {
-    const response = await notion.databases.query({
-      database_id: NOTION_TASKS_DB_ID,
-      filter: {
-        property: "Worker Name",
-        rollup: {
-          any: {
-            rich_text: {
-              equals: name,
-            },
-          },
-        },
-      },
-      sorts: [
-        {
-          property: NOTION_TAG_CREATEDTIME,
-          direction: "descending",
-        },
-      ],
-    });
-    const result = response.results[0].properties["End Time"].date
-      ? response.results[0].properties["End Time"].date.start
-      : null;
-
-    return result;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-// FETCH ALL THE PAGE IDS OF THE TEAM.
-const fetchTeamIds = async () => {
-  try {
-    const response = await notion.databases.query({
-      database_id: NOTION_WORKER_DB_ID,
-    });
-    return response.results;
-  } catch (error) {
-    console.error(error.body);
-  }
-};
-
-const notionPreReminder = async () => {
-  try {
-    const teamObj = {};
-    const teamIDs = await fetchTeamIds();
-    for (const item of teamIDs) {
-      const title = item.properties.Name.title[0];
-      const richText = item.properties[NOTION_TAG_DISCORDUSERID].rich_text[0];
-      const name = title ? title.plain_text : null;
-      const discordUsername = richText ? richText.plain_text : null;
-
-      if (!name) continue;
-      const date = await fetchTasks(name);
-      if (!discordUsername) {
-        console.error(`username not aval in Notion for ${name}`);
-        continue;
-      }
-      if (!date) {
-        teamObj[discordUsername] = true;
-        continue;
-      }
-      const diff = differenceInHours(new Date(), new Date(date));
-      if (diff >= 4 || diff >= 4) teamObj[discordUsername] = true;
-      else teamObj[discordUsername] = false;
-    }
-    return teamObj;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const addNewTask = async (fields) => {
   try {
     const responseID = await notion.pages.create({
@@ -905,5 +832,4 @@ module.exports = {
   logTask,
   addNewTask,
   addLogTask,
-  notionPreReminder,
 };
