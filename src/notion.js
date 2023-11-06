@@ -4,7 +4,6 @@ const { Client } = require("@notionhq/client");
 const {
   startOfMonth,
   endOfMonth,
-  differenceInHours,
   startOfWeek,
   endOfWeek,
   format,
