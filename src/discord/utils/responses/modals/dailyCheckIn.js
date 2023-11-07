@@ -1,17 +1,30 @@
+const CheckIn = require("../../../../schemas/checkIn");
+const Task = require("../../../../schemas/task");
+
 const addCheckedInRole = require("../../../../functions/checkInRole");
 
 const { createCheckInTasks } = require("../../../../notion");
+const { format } = require("date-fns");
 
 module.exports = {
   data: {
     name: "dailyCheckIn",
   },
-  async execute(interaction, client) {
+  async execute(interaction) {
     await addCheckedInRole(interaction);
 
-    const todayWorks = interaction.fields.getTextInputValue("todayTask");
-    const blockers = interaction.fields.getTextInputValue("blockers");
-    const user = interaction.user;
+    const todayWorks = await interaction.fields.getTextInputValue("todayTask");
+    const blockers = await interaction.fields.getTextInputValue("blockers");
+
+    const user = await interaction.user;
+
+    let blockersTrimmed = blockers
+      .toLowerCase()
+      .replace(/[^a-z]/gi, "")
+      .trim();
+    if (blockersTrimmed == "no") {
+      blockersTrimmed = "";
+    }
 
     const info = {
       todayWorks,
@@ -34,6 +47,28 @@ module.exports = {
       .send(
         `<@${info.userId}> just checked in those tasks:\n\`\`\`\n${todayWorks}\n${blockersResponse}\n\`\`\``
       );
+    const date = format(new Date(), "yyyy-MM-dd");
+    const checkName = info.name + " checked in " + date;
+
+    const checkIn = await new CheckIn({
+      name: checkName,
+      discord_userId: info.userId,
+      blockers: info.blockers,
+      created_time: date,
+    });
+    works = info.todayWorks.split("\n");
+    for (const taskName of works) {
+      const task = new Task({
+        name: taskName,
+        discord_userId: info.userId,
+        created_time: date,
+        done: false,
+      });
+      await task.save().catch(console.error);
+      console.log(task);
+    }
+    await checkIn.save().catch(console.error);
+    console.log(checkIn);
     await createCheckInTasks(info);
   },
 };

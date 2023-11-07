@@ -4,7 +4,6 @@ const { Client } = require("@notionhq/client");
 const {
   startOfMonth,
   endOfMonth,
-  differenceInHours,
   startOfWeek,
   endOfWeek,
   format,
@@ -37,9 +36,9 @@ const NOTION_TASKS_TAG_DONE = "Done?";
 const NOTION_TASKS_TAG_DAY = "Day";
 const NOTION_TASKS_TAG_WEEK = "Week";
 const NOTION_TASKS_TAG_MONTH = "Month";
-const NOTION_NAME_WORKERROLLUP = "Worker Name";
 const NOTION_TAG_DISCORDUSERID = "Discord UserID";
 const NOTION_TAG_NAME = "title";
+const NOTION_TAG_PROJECT = "Project";
 const NOTION_TAG_CREATEDTIME = "Created time";
 const NOTION_TIMEZONE = "Africa/Cairo";
 const notion = new Client({
@@ -151,7 +150,7 @@ const isAvail = async (fields) => {
   }
 };
 
-const fetchCheckIn = async (memberID, fields) => {
+const fetchCheckIn = async (memberID) => {
   try {
     const date = format(new Date(), "yyyy-MM-dd");
     const response = await notion.databases.query({
@@ -179,35 +178,6 @@ const fetchCheckIn = async (memberID, fields) => {
 
     return response.results[0].id;
     // return response.id;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const fetchCheckIns = async (fields) => {
-  try {
-    const date = format(new Date(), "yyyy-MM-dd");
-    const response = await notion.databases.query({
-      database_id: NOTION_CHECKIN_DB_ID,
-      filter: {
-        property: NOTION_TAG_CREATEDTIME,
-        date: {
-          equals: date,
-        },
-      },
-    });
-    let checkInUsers = [];
-    if (!response.results.length) {
-      return checkInUsers;
-    }
-
-    for (const result of response.results) {
-      const discordUserId =
-        result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
-      if (!discordUserId.length) continue;
-      checkInUsers.push(discordUserId[0].rich_text[0].text.content);
-    }
-    return checkInUsers;
   } catch (error) {
     console.error(error);
   }
@@ -368,41 +338,6 @@ const createTask = async (
   }
 };
 
-const checkInAvail = async (userId) => {
-  try {
-    const date = format(new Date(), "yyyy-MM-dd");
-    const response = await notion.databases.query({
-      database_id: NOTION_CHECKIN_DB_ID,
-      filter: {
-        and: [
-          {
-            property: NOTION_TAG_DISCORDUSERID,
-            rollup: {
-              any: {
-                rich_text: {
-                  contains: userId,
-                },
-              },
-            },
-          },
-          {
-            property: NOTION_TAG_CREATEDTIME,
-            date: {
-              equals: date,
-            },
-          },
-        ],
-      },
-    });
-    if (response.results.length == 0) {
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const getDayId = async () => {
   try {
     const date = format(new Date(), "yyyy-MM-dd");
@@ -454,7 +389,7 @@ const getWeekId = async () => {
     console.error(error);
   }
 };
-getWeekId();
+
 const getMonthId = async () => {
   try {
     const date = new Date();
@@ -486,6 +421,7 @@ const getMonthId = async () => {
     console.error(error);
   }
 };
+
 (async () => {
   try {
     new cron.CronJob("0 0 9 * * *", async () => {
@@ -595,66 +531,6 @@ const createCheckInTasks = async (fields) => {
   }
 };
 
-const fetchTasksUsers = async () => {
-  try {
-    const date = format(new Date(), "yyyy-MM-dd");
-    const responseChecks = await notion.databases.query({
-      database_id: NOTION_CHECKIN_DB_ID,
-      filter: {
-        property: NOTION_TAG_CREATEDTIME,
-        date: {
-          equals: date,
-        },
-      },
-    });
-    if (!responseChecks.results.length) {
-      return {};
-    }
-    const response = await notion.databases.query({
-      database_id: NOTION_TASKS_DB_ID,
-      filter: {
-        and: [
-          {
-            property: NOTION_TASKS_TAG_DONE,
-            formula: {
-              checkbox: {
-                does_not_equal: true,
-              },
-            },
-          },
-          {
-            property: NOTION_TAG_CREATEDTIME,
-            date: {
-              equals: date,
-            },
-          },
-        ],
-      },
-    });
-    let tasks = {};
-    if (!response.results.length) {
-      return tasks;
-    }
-    for (const result of response.results) {
-      const discordUserId =
-        result.properties[NOTION_TAG_DISCORDUSERID].rollup.array;
-      if (!discordUserId.length) continue;
-      const memberDiscordUserId = discordUserId[0].rich_text[0].text.content;
-      if (!result.properties.Name.title[0]) continue;
-      const title = result.properties.Name.title[0].plain_text.replace(
-        " ON LOGGING",
-        ""
-      );
-      tasks[memberDiscordUserId] = !tasks[memberDiscordUserId]
-        ? [title]
-        : (tasks[memberDiscordUserId] = [...tasks[memberDiscordUserId], title]);
-    }
-    return tasks;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const logTask = async (fields) => {
   try {
     console.log(fields)
@@ -663,7 +539,6 @@ const logTask = async (fields) => {
       memberID = await isAvail(fields);
     }
     if (!memberID) return console.log("User not found.");
-
     const responseID = await notion.databases.query({
       database_id: NOTION_TASKS_DB_ID,
       filter: {
@@ -714,104 +589,48 @@ const logTask = async (fields) => {
       },
     });
     if (!responseID.results.length) return console.log("Task not found.");
-    const response = await notion.pages.update({
-      page_id: responseID.results[0].id,
-      properties: {
-        Tags: {
-          select: {
-            name: fields.taskTag,
-          },
-        },
-        [NOTION_TASKS_TAG_STTIME]: {
-          date: {
-            start: fields.startTime,
-            time_zone: NOTION_TIMEZONE,
-          },
-        },
-        [NOTION_TASKS_TAG_ENTIME]: {
-          date: {
-            start: fields.endTime,
-            time_zone: NOTION_TIMEZONE,
-          },
-        },
-      },
-    });
-    console.log(response);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const fetchTasks = async (name) => {
-  try {
-    const response = await notion.databases.query({
-      database_id: NOTION_TASKS_DB_ID,
-      filter: {
-        property: "Worker Name",
-        rollup: {
-          any: {
-            rich_text: {
-              equals: name,
+    for (let i = 0; i < responseID.results.length; i++) {
+      const name = responseID.results[i].properties.Name.title[0].text.content;
+      if (name === fields.taskName) {
+        let response = await notion.pages.update({
+          page_id: responseID.results[i].id,
+          properties: {
+            Tags: {
+              select: {
+                name: fields.taskTag,
+              },
+            },
+            [NOTION_TASKS_TAG_STTIME]: {
+              date: {
+                start: fields.startTimeParsed,
+                time_zone: NOTION_TIMEZONE,
+              },
+            },
+            [NOTION_TASKS_TAG_ENTIME]: {
+              date: {
+                start: fields.endTimeParsed,
+                time_zone: NOTION_TIMEZONE,
+              },
             },
           },
-        },
-      },
-      sorts: [
-        {
-          property: NOTION_TAG_CREATEDTIME,
-          direction: "descending",
-        },
-      ],
-    });
-    const result = response.results[0].properties["End Time"].date
-      ? response.results[0].properties["End Time"].date.start
-      : null;
-
-    return result;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-// FETCH ALL THE PAGE IDS OF THE TEAM.
-const fetchTeamIds = async () => {
-  try {
-    const response = await notion.databases.query({
-      database_id: NOTION_WORKER_DB_ID,
-    });
-    return response.results;
-  } catch (error) {
-    console.error(error.body);
-  }
-};
-
-const notionPreReminder = async () => {
-  try {
-    const teamObj = {};
-    const teamIDs = await fetchTeamIds();
-    for (const item of teamIDs) {
-      const title = item.properties.Name.title[0];
-      const richText = item.properties[NOTION_TAG_DISCORDUSERID].rich_text[0];
-      const name = title ? title.plain_text : null;
-      const discordUsername = richText ? richText.plain_text : null;
-
-      if (!name) continue;
-      const date = await fetchTasks(name);
-      if (!discordUsername) {
-        console.error(`username not aval in Notion for ${name}`);
-        continue;
+        });
+        if (fields.project) {
+          response = await notion.pages.update({
+            page_id: response.id,
+            properties: {
+              [NOTION_TAG_PROJECT]: {
+                select: {
+                  name: fields.project,
+                },
+              },
+            },
+          });
+        }
+        console.log(response);
       }
-      if (!date) {
-        teamObj[discordUsername] = true;
-        continue;
-      }
-      const diff = differenceInHours(new Date(), new Date(date));
-      if (diff >= 4 || diff >= 4) teamObj[discordUsername] = true;
-      else teamObj[discordUsername] = false;
     }
-    return teamObj;
   } catch (error) {
-    console.error(error);
+    console.log(error);
   }
 };
 
@@ -841,6 +660,9 @@ const addNewTask = async (fields) => {
     let checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
     if (checkIDForNewTasks === undefined) {
       checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
+    } else if (checkIDForNewTasks == null) {
+      console.log("NAH CHECK IN NOT AVAIL");
+      return;
     }
     let dayPageID = await getDayId();
     if (dayPageID === undefined) {
@@ -928,7 +750,7 @@ const addLogTask = async (fields) => {
     if (monthPageID === undefined) {
       monthPageID = await monthPageID();
     }
-    const response = await notion.pages.create({
+    let response = await notion.pages.create({
       parent: {
         type: "database_id",
         database_id: NOTION_TASKS_DB_ID,
@@ -991,18 +813,30 @@ const addLogTask = async (fields) => {
         },
         [NOTION_TASKS_TAG_STTIME]: {
           date: {
-            start: fields.startTime,
+            start: fields.startTimeParsed,
             time_zone: NOTION_TIMEZONE,
           },
         },
         [NOTION_TASKS_TAG_ENTIME]: {
           date: {
-            start: fields.endTime,
+            start: fields.endTimeParsed,
             time_zone: NOTION_TIMEZONE,
           },
         },
       },
     });
+    if (fields.project) {
+      response = await notion.pages.update({
+        page_id: response.id,
+        properties: {
+          [NOTION_TAG_PROJECT]: {
+            select: {
+              name: fields.project,
+            },
+          },
+        },
+      });
+    }
     console.log(response);
   } catch (error) {
     console.error(error);
@@ -1011,12 +845,8 @@ const addLogTask = async (fields) => {
 
 module.exports = {
   tags,
-  checkInAvail,
   createCheckInTasks,
-  fetchTasksUsers,
   logTask,
-  fetchCheckIns,
   addNewTask,
   addLogTask,
-  notionPreReminder,
 };

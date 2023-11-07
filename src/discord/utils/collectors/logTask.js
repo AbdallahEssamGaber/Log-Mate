@@ -1,3 +1,5 @@
+const Task = require("../../../schemas/task");
+
 const { ActionRowBuilder, ComponentType } = require("discord.js");
 const newButton = require("../../utils/components/buttonBuilder");
 const {
@@ -7,12 +9,18 @@ const {
 const { logTask } = require("../../../notion");
 const timeCalc = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
+const { format } = require("date-fns");
 
-module.exports = async (interaction, info) => {
+module.exports = async (interaction, info, timesPreSelected) => {
   const startTimeSelectValues = [];
   const endTimeSelectValues = [];
+  const date = format(new Date(), "yyyy-MM-dd");
+
   for (let i = -1.5; i < 1.5; i += 0.5) {
     const value = timeCalc(i);
+
+    if (timesPreSelected.includes(value.toLowerCase().replace(/\s+/g, "")))
+      continue;
     const menuOptions = await newStringSelectMenuOptionBuilder({
       label: value,
       value: value,
@@ -43,13 +51,12 @@ module.exports = async (interaction, info) => {
   const row = new ActionRowBuilder().addComponents(startTimeSelect);
   const row2 = new ActionRowBuilder().addComponents(endTimeSelect);
   const row3 = new ActionRowBuilder().addComponents(confirm);
-
   const response = await interaction.reply({
     content: `\`\`\`Task: ${info.taskName}✅\`\`\`\nChose It's Start and End Time For The Task Below, Please.`,
     components: [row, row2, row3],
     ephemeral: true,
   });
-
+  console.log("Sam.");
   const filter = (i) =>
     i.user.id === interaction.user.id &&
     (i.customId === "confirmTime" ||
@@ -58,7 +65,7 @@ module.exports = async (interaction, info) => {
   const collectorButton = interaction.channel.createMessageComponentCollector({
     componentType: ComponentType.Button,
     filter,
-    time: 50000,
+    time: 30000,
   });
   const collectorSelect = interaction.channel.createMessageComponentCollector({
     componentType: ComponentType.StringSelect,
@@ -96,15 +103,37 @@ module.exports = async (interaction, info) => {
       await response.edit({
         content: `Way to gooo👏👏\nYou finished ${info.taskName} from ${taskLog.startTimeSelector} until ${taskLog.endTimeSelector}`,
         components: [],
+        ephemeral: true,
       });
-      startTime = parseTime(startTime);
-      endTime = parseTime(endTime);
-      info = { ...info, startTime, endTime };
+
+      startTimeParsed = parseTime(startTime);
+      endTimeParsed = parseTime(endTime);
+      startTime = startTime.toLowerCase().replace(/\s+/g, "");
+      endTime = endTime.toLowerCase().replace(/\s+/g, "");
+      info = { ...info, startTimeParsed, endTimeParsed, startTime, endTime };
       interaction.guild.channels.cache
         .get(process.env.DEV_DISCORD_CHANNEL_ID)
         .send(
           `<@${info.userId}> just Logged\n\`\`\`\n${info.taskName}\nFrom ${taskLog.startTimeSelector} Until ${taskLog.endTimeSelector}\n\`\`\``
         );
+      const task = await Task.findOneAndUpdate(
+        {
+          name: info.taskName,
+          created_time: date,
+          done: false,
+        },
+        {
+          done: true,
+          start_time: info.startTimeParsed,
+          end_time: info.endTimeParsed,
+          tag: info.taskTag,
+          times: [info.startTime, info.endTime],
+          project: info.project,
+        },
+        { new: true }
+      );
+      console.log(task);
+      console.log(info);
       await logTask(info);
     } else if (
       (taskLog["startTimeSelector"] === undefined ||
