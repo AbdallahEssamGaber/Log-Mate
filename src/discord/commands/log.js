@@ -1,4 +1,3 @@
-const CheckIn = require("../../schemas/checkIn");
 const Task = require("../../schemas/task");
 const Project = require("../../schemas/project");
 

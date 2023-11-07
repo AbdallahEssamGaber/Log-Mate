@@ -44,7 +44,7 @@ module.exports = {
       filtered.map((choice) => ({ name: choice, value: choice }))
     );
   },
-  async execute(interaction, client) {
+  async execute(interaction) {
     const projectName = interaction.options.getString("project");
     const user = interaction.user;
 

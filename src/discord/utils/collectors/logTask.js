@@ -14,7 +14,6 @@ const { format } = require("date-fns");
 module.exports = async (interaction, info, timesPreSelected) => {
   const startTimeSelectValues = [];
   const endTimeSelectValues = [];
-  const id = interaction.user.id;
   const date = format(new Date(), "yyyy-MM-dd");
 
   for (let i = -1.5; i < 1.5; i += 0.5) {

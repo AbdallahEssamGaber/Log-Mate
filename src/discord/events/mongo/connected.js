@@ -3,7 +3,7 @@ const chalk = require("chalk");
 module.exports = {
   name: "connected",
 
-  async execute(client) {
+  async execute() {
     console.log(chalk.green("{Database Status}: Connected."));
   },
 };

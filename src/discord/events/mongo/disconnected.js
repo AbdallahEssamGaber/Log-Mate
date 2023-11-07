@@ -3,7 +3,7 @@ const chalk = require("chalk");
 module.exports = {
   name: "disconnected",
 
-  async execute(client) {
+  async execute() {
     console.log(chalk.red("{Database Status}: Disconnected."));
   },
 };

@@ -10,7 +10,7 @@ module.exports = {
   data: {
     name: "dailyCheckIn",
   },
-  async execute(interaction, client) {
+  async execute(interaction) {
     await addCheckedInRole(interaction);
 
     const todayWorks = await interaction.fields.getTextInputValue("todayTask");

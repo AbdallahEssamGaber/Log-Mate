@@ -16,7 +16,7 @@ module.exports = async () => {
   const eventsFiles = await loadFiles("events");
   const responsesFiles = await loadFiles("utils/responses");
   await deployCommands(Bot.client, commandFiles);
-  // reminderInterval();
+
   //Start the listeners
   await mountListeners(Bot.client, eventsFiles);
 

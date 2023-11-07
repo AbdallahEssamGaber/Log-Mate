@@ -36,7 +36,6 @@ const NOTION_TASKS_TAG_DONE = "Done?";
 const NOTION_TASKS_TAG_DAY = "Day";
 const NOTION_TASKS_TAG_WEEK = "Week";
 const NOTION_TASKS_TAG_MONTH = "Month";
-const NOTION_NAME_WORKERROLLUP = "Worker Name";
 const NOTION_TAG_DISCORDUSERID = "Discord UserID";
 const NOTION_TAG_NAME = "title";
 const NOTION_TAG_PROJECT = "Project";
@@ -151,7 +150,7 @@ const isAvail = async (fields) => {
   }
 };
 
-const fetchCheckIn = async (memberID, fields) => {
+const fetchCheckIn = async (memberID) => {
   try {
     const date = format(new Date(), "yyyy-MM-dd");
     const response = await notion.databases.query({

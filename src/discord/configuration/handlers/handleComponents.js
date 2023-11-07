@@ -1,5 +1,5 @@
 module.exports = async (client, files) => {
-  const { buttons, modals, selects } = client;
+  const { selects } = client;
   for (const file of files) {
     if (file.includes("buttons")) {
       const button = require(file);

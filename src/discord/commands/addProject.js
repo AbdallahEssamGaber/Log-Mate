@@ -2,8 +2,6 @@ const Project = require("../../schemas/project");
 
 const { SlashCommandBuilder } = require("discord.js");
 
-const { format } = require("date-fns");
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("add-project")
@@ -14,7 +12,7 @@ module.exports = {
         .setDescription("Type the project you want to add.")
         .setRequired(true)
     ),
-  async execute(interaction, client) {
+  async execute(interaction) {
     const projectName = interaction.options.getString("project");
     const user = interaction.user;
 
@@ -24,7 +22,6 @@ module.exports = {
       name: user.globalName,
       userId: user.id,
     };
-    const date = format(new Date(), "yyyy-MM-dd");
 
     await interaction.reply({
       content: `*${projectName}* added to your projects list.`,

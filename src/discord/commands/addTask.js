@@ -1,4 +1,3 @@
-const CheckIn = require("../../schemas/checkIn");
 const Task = require("../../schemas/task");
 
 const { SlashCommandBuilder } = require("discord.js");
@@ -16,7 +15,7 @@ module.exports = {
         .setDescription("Type the task you want to add.")
         .setRequired(true)
     ),
-  async execute(interaction, client) {
+  async execute(interaction) {
     const taskName = interaction.options.getString("task");
     const user = interaction.user;
 
