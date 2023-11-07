@@ -14,16 +14,16 @@ module.exports = {
     await addCheckedInRole(interaction);
 
     const todayWorks = await interaction.fields.getTextInputValue("todayTask");
-    let blockers = await interaction.fields.getTextInputValue("blockers");
+    const blockers = await interaction.fields.getTextInputValue("blockers");
 
     const user = await interaction.user;
 
-    blockers = blockers
+    let blockersTrimmed = blockers
       .toLowerCase()
       .replace(/[^a-z]/gi, "")
       .trim();
-    if (blockers == "no") {
-      blockers = "";
+    if (blockersTrimmed == "no") {
+      blockersTrimmed = "";
     }
 
     const info = {
