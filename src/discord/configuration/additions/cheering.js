@@ -27,7 +27,9 @@ module.exports = async (client) => {
       }).count();
 
       if (allTasksNumber == allDoneTasksNumber) {
-        member.user.send("Yaaaaaaay finished all today's tasks.");
+        member.user.send(
+          "Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!"
+        );
         if (dailyCounter[userId] !== undefined) {
           dailyCounter[userId] += dailyCounter[userId];
         } else {
@@ -64,13 +66,13 @@ module.exports = async (client) => {
       console.log(member);
       const weeklyEmbed = new EmbedBuilder()
         .setColor("#57F287")
-        .setTitle("Weekly Finishherrrr!")
+        .setTitle("Weekly Tasks Finisher!")
         .setAuthor({
           name: userName,
           iconURL: `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`,
         })
         .setDescription(
-          `Yo everyone, Your lovely worker ${userName} finished all the the tasks *for a week streak*....let's hear it up for him.`
+          `Everyone, Our astonishing worker ${userName} finished all the the tasks *for a week streak*....You always find a way to get it done – and done well! Having you on the team makes a huge difference.`
         );
 
       channel.send({ embeds: [weeklyEmbed] });
