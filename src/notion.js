@@ -533,6 +533,7 @@ const createCheckInTasks = async (fields) => {
 
 const logTask = async (fields) => {
   try {
+    console.log(fields)
     let memberID = await isAvail(fields);
     if (memberID === undefined) {
       memberID = await isAvail(fields);
@@ -541,17 +542,35 @@ const logTask = async (fields) => {
     const responseID = await notion.databases.query({
       database_id: NOTION_TASKS_DB_ID,
       filter: {
-        and: [
+        or: [
           {
-            property: NOTION_TASKS_TAG_DONE,
-            formula: {
-              checkbox: {
-                does_not_equal: true,
+            and: [
+              {
+                property: NOTION_TASKS_TAG_DONE,
+                formula: {
+                  checkbox: {
+                    does_not_equal: true,
+                  },
+                },
               },
-            },
+              {
+                property: NOTION_TAG_NAME,
+                rich_text: {
+                  equals: fields.taskName,
+                },
+              },
+            ],
           },
           {
-            or: [
+            and: [
+              {
+                property: NOTION_TASKS_TAG_DONE,
+                formula: {
+                  checkbox: {
+                    does_not_equal: true,
+                  },
+                },
+              },
               {
                 property: NOTION_TASKS_TAG_MEMBER,
                 relation: {
