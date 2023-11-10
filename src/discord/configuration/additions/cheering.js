@@ -43,7 +43,7 @@ module.exports = async (client) => {
   const weeklyScheduledMessage = new cron.CronJob("0 0 21 * * 5", async () => {
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     const channel = guild.channels.cache;
-    const foundChannel = undefined;
+    let foundChannel = undefined;
     for (const item of channel.values()) {
       if (item.id == process.env.CONGRATS_DISCORD_CHANNEL_ID) {
         foundChannel = channel.get(item.id);
