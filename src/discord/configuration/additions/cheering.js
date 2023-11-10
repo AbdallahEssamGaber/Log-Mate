@@ -3,10 +3,12 @@ const { EmbedBuilder } = require("discord.js");
 
 const cron = require("cron");
 const { format } = require("date-fns");
+const quotes = require("./quotes.json");
+
 let dailyCounter = {};
 
 module.exports = async (client) => {
-  //everyday at 21(9pm) but Fri
+  // everyday at 21(9pm) but Fri
   const dailyScheduledMessage = new cron.CronJob("0 0 21 * * 0-4", async () => {
     const date = format(new Date(), "yyyy-MM-dd");
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
@@ -27,8 +29,11 @@ module.exports = async (client) => {
       }).count();
 
       if (allTasksNumber == allDoneTasksNumber) {
+        const length = quotes.length;
+        const number = Math.floor(Math.random() * length);
+        const quote = quotes[number];
         member.user.send(
-          "Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!"
+          `Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!\n\n> ${quote.text}\n> *-${quote.author}*`
         );
         if (dailyCounter[userId] !== undefined) {
           dailyCounter[userId] += dailyCounter[userId];
