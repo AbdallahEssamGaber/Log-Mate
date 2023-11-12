@@ -8,8 +8,8 @@ const quotes = require("./quotes.json");
 let dailyCounter = {};
 
 module.exports = async (client) => {
-  // everyday at 21(9pm) but Fri
-  const dailyScheduledMessage = new cron.CronJob("0 0 21 * * 0-4", async () => {
+  //everyday at 23(11pm) but Fri
+  const dailyScheduledMessage = new cron.CronJob("0 0 23 * * 0-4", async () => {
     const date = format(new Date(), "yyyy-MM-dd");
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
 
@@ -29,9 +29,7 @@ module.exports = async (client) => {
       }).count();
 
       if (allTasksNumber == allDoneTasksNumber) {
-        const length = quotes.length;
-        const number = Math.floor(Math.random() * length);
-        const quote = quotes[number];
+        console.log(member)
         member.user.send(
           `Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!\n\n> ${quote.text}\n> *-${quote.author}*`
         );
@@ -44,8 +42,8 @@ module.exports = async (client) => {
     });
   });
 
-  //Only Fridays at 9pm
-  const weeklyScheduledMessage = new cron.CronJob("0 0 21 * * 5", async () => {
+  //Only Fridays at 11pm
+  const weeklyScheduledMessage = new cron.CronJob("0 0 23 * * 5", async () => {
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     const channel = guild.channels.cache;
     let foundChannel = undefined;
