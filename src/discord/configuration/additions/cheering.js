@@ -3,6 +3,8 @@ const { EmbedBuilder } = require("discord.js");
 
 const cron = require("cron");
 const { format } = require("date-fns");
+const quotes = require("./quotes.json");
+
 let dailyCounter = {};
 
 module.exports = async (client) => {
@@ -29,7 +31,7 @@ module.exports = async (client) => {
       if (allTasksNumber == allDoneTasksNumber) {
         console.log(member)
         member.user.send(
-          "Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!"
+          `Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!\n\n> ${quote.text}\n> *-${quote.author}*`
         );
         if (dailyCounter[userId] !== undefined) {
           dailyCounter[userId] += dailyCounter[userId];
