@@ -28,8 +28,11 @@ module.exports = async (client) => {
         done: true,
       }).count();
 
-      if (allTasksNumber == allDoneTasksNumber) {
-        console.log(member)
+      if (allTasksNumber == allDoneTasksNumber && allTasksNumber != 0) {
+        console.log(member);
+        const length = quotes.length;
+        const number = Math.floor(Math.random() * length);
+        const quote = quotes[number];
         member.user.send(
           `Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!\n\n> ${quote.text}\n> *-${quote.author}*`
         );
@@ -65,20 +68,23 @@ module.exports = async (client) => {
       const userId = member.user.id;
       const userName = member.user.globalName;
       const avatar = member.user.avatar;
-      // if (dailyCounter[userId] == 6) {
-      console.log(member);
-      const weeklyEmbed = new EmbedBuilder()
-        .setColor("#57F287")
-        .setTitle("Weekly Tasks Finisher!")
-        .setAuthor({
-          name: userName,
-          iconURL: `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`,
-        })
-        .setDescription(
-          `Everyone, Our astonishing worker ${userName} finished all the the tasks *for a week streak*....You always find a way to get it done – and done well! Having you on the team makes a huge difference.`
-        );
+      if (dailyCounter[userId] == 6) {
+        console.log(member);
+        const weeklyEmbed = new EmbedBuilder()
+          .setColor("#57F287")
+          .setTitle("Weekly Tasks Finisher!")
+          .setAuthor({
+            name: userName,
+            iconURL: `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`,
+          })
+          .setDescription(
+            `Everyone, Our astonishing worker ${userName} finished all the the tasks *for a week streak*....You always find a way to get it done – and done well! Having you on the team makes a huge difference.`
+          );
 
-      channel.send({ embeds: [weeklyEmbed] });
+        channel.send({ embeds: [weeklyEmbed] });
+      }
+
+      dailyCounter[userId] = 0;
     });
   });
   // When you want to start it, use:
