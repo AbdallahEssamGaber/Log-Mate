@@ -1,7 +1,7 @@
 const CheckIn = require("../../../../schemas/checkIn");
 const Task = require("../../../../schemas/task");
 
-const addCheckedInRole = require("../../../../functions/checkInRole");
+// const addCheckedInRole = require("../../../../functions/checkInRole");
 
 const { createCheckInTasks } = require("../../../../notion");
 const { format } = require("date-fns");
@@ -11,7 +11,7 @@ module.exports = {
     name: "dailyCheckIn",
   },
   async execute(interaction) {
-    await addCheckedInRole(interaction);
+    // await addCheckedInRole(interaction);
 
     const todayWorks = await interaction.fields.getTextInputValue("todayTask");
     const blockers = await interaction.fields.getTextInputValue("blockers");
@@ -22,6 +22,7 @@ module.exports = {
       .toLowerCase()
       .replace(/[^a-z]/gi, "")
       .trim();
+    console.log(blockers, blockersTrimmed);
     if (blockersTrimmed == "no") {
       blockersTrimmed = "";
     }
