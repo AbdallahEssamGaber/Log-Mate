@@ -9,7 +9,7 @@ const app = express();
 
 app.all("/", (req, res) => {
   console.log("Just got a request!");
-  res.send("Yo!");
+  res.sendFile("src/public/awake.html", { root: __dirname });
 });
 
 (async () => {
