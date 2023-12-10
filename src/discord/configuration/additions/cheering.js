@@ -11,8 +11,8 @@ let dailyCounter = {};
 module.exports = async (client) => {
   //everyday at 23(11pm) but Fri
   // const dailyScheduledMessage = new cron.CronJob("0 0 23 * * 0-4", async () => {
-  let date = format(new Date() - 1, "yyyy-MM-dd");
-  let guild = client.guilds.cache.get(process.env.GUILD_ID);
+  const date = format(new Date() - 1, "yyyy-MM-dd");
+  const guild = client.guilds.cache.get(process.env.GUILD_ID);
 
   let res = await guild.members.fetch();
   res = res.filter((member) => !member.user.bot);
