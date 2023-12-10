@@ -9,7 +9,7 @@ const {
 const { logTask } = require("../../../notion");
 const timeCalc = require("../../../functions/general/timeCalc.js");
 const parseTime = require("../../../functions/general/parseTime.js");
-const { format } = require("date-fns");
+const { format, getWeek } = require("date-fns");
 
 module.exports = async (interaction, info, timesPreSelected) => {
   const startTimeSelectValues = [];
@@ -116,6 +116,8 @@ module.exports = async (interaction, info, timesPreSelected) => {
         .send(
           `<@${info.userId}> just Logged\n\`\`\`\n${info.taskName}\nFrom ${taskLog.startTimeSelector} Until ${taskLog.endTimeSelector}\n\`\`\``
         );
+      const weekN = getWeek(new Date(date), 0);
+
       const task = await Task.findOneAndUpdate(
         {
           name: info.taskName,
@@ -129,6 +131,7 @@ module.exports = async (interaction, info, timesPreSelected) => {
           tag: info.taskTag,
           times: [info.startTime, info.endTime],
           project: info.project,
+          week: weekN,
         },
         { new: true }
       );

@@ -6,7 +6,7 @@ const { SlashCommandBuilder } = require("discord.js");
 const { tags, logTask, addLogTask } = require("../../notion");
 
 const parseTime = require("../../functions/general/parseTime.js");
-const { format } = require("date-fns");
+const { format, getWeek } = require("date-fns");
 const CheckInAvail = require("../utils/checkers/checkInAvail.js");
 
 module.exports = {
@@ -226,6 +226,8 @@ module.exports = {
           .send(
             `<@${info.userId}> just Logged\n\`\`\`\n${info.taskName}\nFrom ${startTime} Until ${endTime}\n\`\`\``
           );
+
+        const weekN = getWeek(new Date(date), 0);
         task = await Task.findOneAndUpdate(
           {
             name: info.taskName,
@@ -239,6 +241,7 @@ module.exports = {
             tag: info.taskTag,
             project: projectName,
             times: [info.startTime, info.endTime],
+            week: weekN,
           }
         );
         await logTask(info);
@@ -252,6 +255,8 @@ module.exports = {
           .send(
             `<@${info.userId}> just Added and Logged\n\`\`\`\n${info.taskName}\nFrom ${startTime} Until ${endTime}\n\`\`\``
           );
+
+        const weekN = getWeek(new Date(date), 0);
         task = new Task({
           name: info.taskName,
           discord_userId: info.userId,
@@ -262,6 +267,7 @@ module.exports = {
           tag: info.taskTag,
           project: projectName,
           times: [info.startTime, info.endTime],
+          week: weekN,
         });
         await task.save().catch(console.error);
         console.log(task);

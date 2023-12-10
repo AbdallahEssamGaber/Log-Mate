@@ -4,7 +4,7 @@ const Task = require("../../../../schemas/task");
 // const addCheckedInRole = require("../../../../functions/checkInRole");
 
 const { createCheckInTasks } = require("../../../../notion");
-const { format } = require("date-fns");
+const { format, getWeek } = require("date-fns");
 
 module.exports = {
   data: {
@@ -59,11 +59,13 @@ module.exports = {
     });
     works = info.todayWorks.split("\n");
     for (const taskName of works) {
+      const weekN = getWeek(new Date(date), 0);
       const task = new Task({
         name: taskName,
         discord_userId: info.userId,
         created_time: date,
         done: false,
+        week: weekN,
       });
       await task.save().catch(console.error);
       console.log(task);

@@ -4,6 +4,7 @@ const { EmbedBuilder } = require("discord.js");
 const cron = require("cron");
 const { format } = require("date-fns");
 const quotes = require("./quotes.json");
+const { getWeek } = require("date-fns");
 
 let dailyCounter = {};
 
@@ -29,12 +30,11 @@ module.exports = async (client) => {
       }).count();
 
       if (allTasksNumber == allDoneTasksNumber && allTasksNumber != 0) {
-        console.log(member);
         const length = quotes.length;
         const number = Math.floor(Math.random() * length);
         const quote = quotes[number];
         member.user.send(
-          `Congratulations on Finishing all Today's Tasks👏👏! We're so very proud of you!\n\n> ${quote.text}\n> *-${quote.author}*`
+          `Congratulations on Finishing Your ${allDoneTasksNumber} Tasks for👏👏! We're so very proud of you!\n\n> ${quote.text}\n> *-${quote.author}*`
         );
         if (dailyCounter[userId] !== undefined) {
           dailyCounter[userId] += dailyCounter[userId];
@@ -47,6 +47,7 @@ module.exports = async (client) => {
 
   //Only Fridays at 11pm
   const weeklyScheduledMessage = new cron.CronJob("0 0 23 * * 5", async () => {
+    let date = format(new Date(), "yyyy-MM-dd");
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     const channel = guild.channels.cache;
     let foundChannel = undefined;
@@ -69,7 +70,13 @@ module.exports = async (client) => {
       const userName = member.user.globalName;
       const avatar = member.user.avatar;
       if (dailyCounter[userId] == 6) {
-        console.log(member);
+        date = new Date(date);
+        const allDoneTasksNumber = await Tasks.find({
+          week: getWeek(date, 0),
+          discord_userId: userId,
+          done: true,
+        }).count();
+
         const weeklyEmbed = new EmbedBuilder()
           .setColor("#57F287")
           .setTitle("Weekly Tasks Finisher!")
@@ -78,10 +85,10 @@ module.exports = async (client) => {
             iconURL: `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`,
           })
           .setDescription(
-            `Everyone, Our astonishing worker ${userName} finished all the the tasks *for a week streak*....You always find a way to get it done – and done well! Having you on the team makes a huge difference.`
+            `Everyone, Our astonishing worker **${userName}** finished all **${allDoneTasksNumber} tasks *for a week streak***....You always find a way to get it done – and done well! Having you on the team makes a huge difference.`
           );
 
-        channel.send({ embeds: [weeklyEmbed] });
+        foundChannel.send({ embeds: [weeklyEmbed] });
       }
 
       dailyCounter[userId] = 0;

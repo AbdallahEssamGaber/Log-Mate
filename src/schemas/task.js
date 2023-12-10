@@ -10,6 +10,7 @@ const taskSchema = new Schema({
   end_time: String,
   done: Boolean,
   times: [String],
+  week: Number,
 });
 
 module.exports = model("Task", taskSchema);

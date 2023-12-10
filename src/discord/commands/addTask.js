@@ -3,7 +3,7 @@ const Task = require("../../schemas/task");
 const { SlashCommandBuilder } = require("discord.js");
 
 const { addNewTask } = require("../../notion");
-const { format } = require("date-fns");
+const { format, getWeek } = require("date-fns");
 const CheckInAvail = require("../utils/checkers/checkInAvail");
 module.exports = {
   data: new SlashCommandBuilder()
@@ -42,11 +42,13 @@ module.exports = {
       .get(process.env.DEV_DISCORD_CHANNEL_ID)
       .send(`<@${info.userId}> Just Added a task: \`${taskName}\``);
 
+    const weekN = getWeek(new Date(date), 0);
     const task = new Task({
       name: info.taskName,
       discord_userId: info.userId,
       created_time: date,
       done: false,
+      week: weekN,
     });
     await task.save().catch(console.error);
     console.log(task);

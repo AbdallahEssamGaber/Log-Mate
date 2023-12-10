@@ -6,7 +6,7 @@ const { SlashCommandBuilder } = require("discord.js");
 const { tags, addNewTask } = require("../../notion");
 //FETCH THE TIMES FROM TASKS ONE TIME HERE BUT DO IT IN THE BACKGROUND....SO MAKE THE FETCHING TASKS PUBLIC NOT TO IF AND MAKE IT INSIDE A NEW IF IF THE TASKS FETCHED OR NOT....ONCE ITS FETCHED AND PUSH THE TASKS PUSH THE TIMES..PUSH THE TIMES IN TEH SAME CODE IM SORRY THATS GOING TO BE FASTER.
 const logTaskCollector = require("../utils/collectors/logTask.js");
-const { format } = require("date-fns");
+const { format, getWeek } = require("date-fns");
 const CheckInAvail = require("../utils/checkers/checkInAvail.js");
 let timesPreSelected = [];
 module.exports = {
@@ -148,6 +148,7 @@ module.exports = {
       });
       info = { ...info, project: projectName };
       if (!task) {
+        const weekN = getWeek(new Date(date), 0);
         task = new Task({
           name: info.taskName,
           discord_userId: info.userId,
@@ -155,6 +156,7 @@ module.exports = {
           done: false,
           tag: info.taskTag,
           project: projectName,
+          week: weekN,
         });
         await task.save().catch(console.error);
         console.log(task);
