@@ -62,13 +62,23 @@ module.exports = async (client) => {
       console.log("DIDN'T FIND A CHANNEL.");
       return;
     }
+
     let res = await guild.members.fetch();
 
-    res = res.filter((member) => !member.user.bot);
+    const resBot = res.filter((member) => member.user.bot);
+    res = res.filter((member) => member.user.bot);
+    let botName, botId, botAvatar;
+
+    resBot.forEach(async (member) => {
+      botName = member.user.username;
+      botId = member.user.id;
+      botAvatar = member.user.avatar;
+    });
     res.forEach(async (member) => {
       const userId = member.user.id;
       const userName = member.user.globalName;
       const avatar = member.user.avatar;
+      dailyCounter[userId] = 6;
       if (dailyCounter[userId] == 6) {
         date = new Date(date);
         const allDoneTasksNumber = await Tasks.find({
@@ -81,8 +91,8 @@ module.exports = async (client) => {
           .setColor("#57F287")
           .setTitle("Weekly Tasks Finisher!")
           .setAuthor({
-            name: userName,
-            iconURL: `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`,
+            name: botName,
+            iconURL: `https://cdn.discordapp.com/avatars/${botId}/${botAvatar}.png`,
           })
           .setDescription(
             `Everyone, Our astonishing worker **${userName}** finished all **${allDoneTasksNumber} tasks *for a week streak***....You always find a way to get it done – and done well! Having you on the team makes a huge difference.`
