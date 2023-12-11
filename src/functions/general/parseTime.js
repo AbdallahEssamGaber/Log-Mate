@@ -1,5 +1,3 @@
-var formatISO = require("date-fns/formatISO");
-
 module.exports = (time12h) => {
   time12h = time12h.toLowerCase();
   const modifier = time12h.match(/[a-zA-Z]+/g)[0];
@@ -16,6 +14,6 @@ module.exports = (time12h) => {
   }
   const date = new Date();
   date.setHours(hours, minutes);
-  const result = formatISO(date);
+  const result = date.toISOString();
   return result;
 };

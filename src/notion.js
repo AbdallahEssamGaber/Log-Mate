@@ -175,7 +175,6 @@ const fetchCheckIn = async (memberID) => {
     if (!response.results.length) {
       return null;
     }
-
     return response.results[0].id;
     // return response.id;
   } catch (error) {
@@ -489,21 +488,22 @@ const createCheckInTasks = async (fields) => {
   try {
     //the id for the rollup db for the team member
     let memberID = await isAvail(fields);
-    if (memberID === undefined) {
+    while (memberID === undefined) {
       memberID = await isAvail(fields);
     }
     let date = format(new Date(), "d/M/yy");
     const checkName = fields.name + " Check in " + date;
     let dayPageID = await getDayId();
-    if (dayPageID === undefined) {
+    while (dayPageID === undefined) {
       dayPageID = await getDayId();
     }
+
     let weekPageID = await getWeekId();
-    if (weekPageID === undefined) {
+    while (weekPageID === undefined) {
       weekPageID = await getWeekId();
     }
     let monthPageID = await getMonthId();
-    if (monthPageID === undefined) {
+    while (monthPageID === undefined) {
       monthPageID = await monthPageID();
     }
     const checkID = await createCheckIn(
@@ -534,7 +534,7 @@ const logTask = async (fields) => {
   try {
     console.log(fields);
     let memberID = await isAvail(fields);
-    if (memberID === undefined) {
+    while (memberID === undefined) {
       memberID = await isAvail(fields);
     }
     if (!memberID) return console.log("User not found.");
@@ -651,26 +651,27 @@ const addNewTask = async (fields) => {
       },
     });
     let memberIDForNewTask = await isAvail(fields);
-    if (memberIDForNewTask === undefined) {
+    while (memberIDForNewTask === undefined) {
       memberIDForNewTask = await isAvail(fields);
     }
     let checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
-    if (checkIDForNewTasks === undefined) {
+    while (checkIDForNewTasks === undefined) {
       checkIDForNewTasks = await fetchCheckIn(memberIDForNewTask);
-    } else if (checkIDForNewTasks == null) {
+    }
+    if (checkIDForNewTasks == null) {
       console.log("NAH CHECK IN NOT AVAIL");
       return;
     }
     let dayPageID = await getDayId();
-    if (dayPageID === undefined) {
+    while (dayPageID === undefined) {
       dayPageID = await getDayId();
     }
     let weekPageID = await getWeekId();
-    if (weekPageID === undefined) {
+    while (weekPageID === undefined) {
       weekPageID = await getWeekId();
     }
     let monthPageID = await getMonthId();
-    if (monthPageID === undefined) {
+    while (monthPageID === undefined) {
       monthPageID = await monthPageID();
     }
     const response = await notion.pages.update({
@@ -728,23 +729,23 @@ const addNewTask = async (fields) => {
 const addLogTask = async (fields) => {
   try {
     let memberID = await isAvail(fields);
-    if (memberID === undefined) {
+    while (memberID === undefined) {
       memberID = await isAvail(fields);
     }
     let checkID = await fetchCheckIn(memberID);
-    if (checkID === undefined) {
+    while (checkID === undefined) {
       checkID = await fetchCheckIn(memberID);
     }
     let dayPageID = await getDayId();
-    if (dayPageID === undefined) {
+    while (dayPageID === undefined) {
       dayPageID = await getDayId();
     }
     let weekPageID = await getWeekId();
-    if (weekPageID === undefined) {
+    while (weekPageID === undefined) {
       weekPageID = await getWeekId();
     }
     let monthPageID = await getMonthId();
-    if (monthPageID === undefined) {
+    while (monthPageID === undefined) {
       monthPageID = await monthPageID();
     }
     let response = await notion.pages.create({

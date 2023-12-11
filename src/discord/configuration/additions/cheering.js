@@ -17,7 +17,7 @@ module.exports = async (client) => {
     let res = await guild.members.fetch();
     res = res.filter((member) => !member.user.bot);
 
-    res.forEach(async (member) => {
+    for (const member of res) {
       const userId = member.user.id;
       const allTasksNumber = await Tasks.find({
         created_time: date,
@@ -42,7 +42,7 @@ module.exports = async (client) => {
           dailyCounter[userId] = 0;
         }
       }
-    });
+    }
   });
 
   //Only Fridays at 11pm
@@ -69,12 +69,12 @@ module.exports = async (client) => {
     res = res.filter((member) => member.user.bot);
     let botName, botId, botAvatar;
 
-    resBot.forEach(async (member) => {
+    for (const member of resBot) {
       botName = member.user.username;
       botId = member.user.id;
       botAvatar = member.user.avatar;
-    });
-    res.forEach(async (member) => {
+    }
+    for (const member of res) {
       const userId = member.user.id;
       const userName = member.user.globalName;
       dailyCounter[userId] = 6;
@@ -101,7 +101,7 @@ module.exports = async (client) => {
       }
 
       dailyCounter[userId] = 0;
-    });
+    }
   });
   // When you want to start it, use:
   dailyScheduledMessage.start();

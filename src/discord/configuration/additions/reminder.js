@@ -9,7 +9,7 @@ module.exports = async (client) => {
     let resMembers = await guild.members.fetch();
     resMembers = resMembers.filter((member) => !member.user.bot);
 
-    resMembers.forEach(async (member) => {
+    for (const member of resMembers) {
       const userId = member.user.id;
       const tasks = await Task.find({
         discord_userId: userId,
@@ -23,7 +23,7 @@ module.exports = async (client) => {
         member.user.send(`Please, type \`/log\` command to log task and time.`);
       } else {
         let endDateCounter = 0;
-        doneTasks.forEach(async (task) => {
+        for (const task of doneTasks) {
           const diffHours = differenceInHours(
             new Date(),
             new Date(task.end_time)
@@ -31,14 +31,14 @@ module.exports = async (client) => {
           if (diffHours >= 4) {
             endDateCounter++;
           }
-        });
+        }
         if (doneTasks.length == endDateCounter) {
           member.user.send(
             `Please, type \`/log\` command to log task and time.`
           );
         }
       }
-    });
+    }
   });
 
   // When you want to start it, use:
