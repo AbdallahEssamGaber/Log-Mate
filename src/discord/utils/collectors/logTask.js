@@ -16,7 +16,7 @@ module.exports = async (interaction, info, timesPreSelected) => {
   const endTimeSelectValues = [];
   const date = format(new Date(), "yyyy-MM-dd");
 
-  for (let i = -1.5; i < 1.5; i += 0.5) {
+  for (let i = -3.5; i < 0.5; i += 0.5) {
     const value = timeCalc(i);
 
     if (timesPreSelected.includes(value.toLowerCase().replace(/\s+/g, "")))
@@ -25,8 +25,8 @@ module.exports = async (interaction, info, timesPreSelected) => {
       label: value,
       value: value,
     });
-    if (i !== 1) startTimeSelectValues.push(menuOptions);
-    if (i >= -0.5) endTimeSelectValues.push(menuOptions);
+    if (i <= -1.5) startTimeSelectValues.push(menuOptions);
+    if (i >= -1.5) endTimeSelectValues.push(menuOptions);
   }
   const startTimeSelect = (
     await newStringSelectMenuBuilder({

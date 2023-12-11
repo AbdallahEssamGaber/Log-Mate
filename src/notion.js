@@ -533,7 +533,7 @@ const createCheckInTasks = async (fields) => {
 
 const logTask = async (fields) => {
   try {
-    console.log(fields)
+    console.log(fields);
     let memberID = await isAvail(fields);
     if (memberID === undefined) {
       memberID = await isAvail(fields);
